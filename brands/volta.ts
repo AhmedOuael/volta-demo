@@ -18,5 +18,5 @@ export const volta: Brand = {
   fonts: { display: "Inter", body: "Inter" },
   tagline: "Caméras, micros, éclairage et informatique pour créateurs",
   deliveryPromise: "Livraison 58 wilayas · Paiement à la livraison",
-  heroImage: "/products/hero-studio.jpg",
+  heroImage: "/catalog/hero-studio.jpg",
 };

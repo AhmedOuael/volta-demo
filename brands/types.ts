@@ -19,6 +19,6 @@ export interface Brand {
   fonts: { display: string; body: string }; // families installed via @fontsource
   tagline: string;
   deliveryPromise: string;
-  heroImage: string; // path under /public
+  heroImage: string; // path under /public (catalogue photos live in /catalog)
   instagram?: string; // handle without @, shown for private brands
 }

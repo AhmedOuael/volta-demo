@@ -1,9 +1,10 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
+import { serverBrandHref } from "@/lib/brand/server";
 import LoginForm from "./LoginForm";
 
 export default async function AdminLoginPage() {
-  if (await getCurrentUser()) redirect("/admin");
+  if (await getCurrentUser()) redirect(await serverBrandHref("/admin"));
 
   return (
     <div className="min-h-screen flex items-center justify-center px-5">

@@ -2,8 +2,9 @@
 
 import { redirect } from "next/navigation";
 import { deleteSession } from "@/lib/auth/session";
+import { serverBrandHref } from "@/lib/brand/server";
 
 export async function logoutAction() {
   await deleteSession();
-  redirect("/admin/login");
+  redirect(await serverBrandHref("/admin/login"));
 }

@@ -3,6 +3,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { cache } from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { serverBrandHref } from "../brand/server";
 import { prisma } from "../prisma";
 
 export const SESSION_COOKIE = "noir_admin_session";
@@ -57,7 +58,7 @@ export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
  */
 export async function requireUser(role?: Role): Promise<SessionUser> {
   const user = await getCurrentUser();
-  if (!user) redirect("/admin/login");
-  if (role === "ADMIN" && user.role !== "ADMIN") redirect("/admin/orders");
+  if (!user) redirect(await serverBrandHref("/admin/login"));
+  if (role === "ADMIN" && user.role !== "ADMIN") redirect(await serverBrandHref("/admin/orders"));
   return user;
 }

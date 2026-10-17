@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { login } from "@/lib/auth/login";
+import { serverBrandHref } from "@/lib/brand/server";
 
 export type LoginState = { error: string | null };
 
@@ -14,5 +15,5 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
 
   const result = await login(email, password);
   if (!result.ok) return { error: result.error };
-  redirect("/admin"); // admins land on Overview; staff are sent on to Orders
+  redirect(await serverBrandHref("/admin")); // admins land on Overview; staff are sent on to Orders
 }

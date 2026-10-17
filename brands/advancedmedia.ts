@@ -19,6 +19,6 @@ export const advancedmedia: Brand = {
   fonts: { display: "Inter", body: "Inter" },
   tagline: "Accessoires audiovisuels et informatique",
   deliveryPromise: "Livraison 69 wilayas · Paiement à la livraison",
-  heroImage: "/products/hero-studio.jpg",
+  heroImage: "/catalog/hero-studio.jpg",
   instagram: "advancedmedia.dz",
 };
