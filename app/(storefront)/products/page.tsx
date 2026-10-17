@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { getCategories, getProducts } from "@/lib/catalog";
+import FilterSheet from "@/components/catalog/FilterSheet";
+import { getCategories, getMakers, getProducts } from "@/lib/catalog";
+import { parseFilters } from "@/lib/catalog-filters";
 import ProductGrid from "./ProductGrid";
-
-export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "Boutique",
@@ -10,17 +10,20 @@ export const metadata: Metadata = {
   alternates: { canonical: "/products" },
 };
 
-export default async function ProductsPage() {
-  const [products, categories] = await Promise.all([getProducts(), getCategories()]);
+export default async function ProductsPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  const filters = parseFilters(await searchParams);
+  const [products, all, categories, makers] = await Promise.all([getProducts(filters), getProducts(), getCategories(), getMakers()]);
 
   return (
     <div className="px-5 md:px-16 py-16">
-      <div className="mb-12 motion-safe:animate-rise">
+      <div className="mb-10 motion-safe:animate-rise">
         <p className="text-xs tracking-label uppercase text-secondary mb-2">Catalogue</p>
-        <h1 className="font-display text-3xl md:text-5xl">Tous les produits</h1>
+        <h1 className="font-display text-3xl md:text-5xl">{filters.cat ?? "Tous les produits"}</h1>
       </div>
 
-      <ProductGrid products={products} categories={categories} />
+      <FilterSheet filters={filters} categories={categories} makers={makers}>
+        <ProductGrid products={products} total={all.length} />
+      </FilterSheet>
     </div>
   );
 }

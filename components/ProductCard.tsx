@@ -6,7 +6,7 @@ import { formatDZD } from "@/lib/format";
 export default function ProductCard({ product }: { product: CatalogProduct }) {
   return (
     <Link href={`/products/${product.slug}`} className="group block">
-      <div className="aspect-3/4 overflow-hidden mb-4 bg-surface-container relative">
+      <div className="aspect-square overflow-hidden mb-4 bg-surface-container relative">
         {product.image ? (
           <Image
             src={product.image}
@@ -26,11 +26,11 @@ export default function ProductCard({ product }: { product: CatalogProduct }) {
           </span>
         )}
       </div>
-      {/* Name gets the full width; color and price share a line from sm up and
+      {/* Name gets the full width; maker and price share a line from sm up and
           stack on phones, so a wrapping name never pushes the price out of line. */}
       <h4 className="font-display text-lg leading-snug">{product.name}</h4>
       <div className="mt-1.5 flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3">
-        <p className="text-secondary text-xs tracking-label uppercase">{product.colorName}</p>
+        <p className="text-secondary text-xs tracking-label uppercase">{product.maker}</p>
         <span className="text-sm font-semibold whitespace-nowrap">{formatDZD(product.price)}</span>
       </div>
     </Link>

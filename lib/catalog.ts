@@ -3,6 +3,8 @@ import { cache } from "react";
 import { prisma } from "./prisma";
 import { imageUrl } from "./images";
 import type { Prisma } from "./generated/prisma/client";
+import { parseSpecs, type Spec } from "./specs";
+import { applyAggregateFilters, buildProductWhere, type CatalogFilters } from "./catalog-filters";
 
 // Plain, serializable shapes handed to components (no BigInt/Decimal).
 export type CatalogVariant = {
@@ -18,6 +20,8 @@ export type CatalogProduct = {
   id: string;
   slug: string;
   name: string;
+  maker: string;
+  specs: Spec[];
   description: string | null;
   details: string[];
   categories: string[]; // all active categories, alphabetical
@@ -65,6 +69,8 @@ function toCatalogProduct(p: ProductRow): CatalogProduct {
     id: p.id.toString(),
     slug: p.slug,
     name: p.name,
+    maker: p.maker,
+    specs: parseSpecs(p.specs),
     description: p.description,
     details: p.details,
     categories,
@@ -79,13 +85,26 @@ function toCatalogProduct(p: ProductRow): CatalogProduct {
 
 const listable = { active: true, variants: { some: { active: true } } } satisfies Prisma.ProductWhereInput;
 
-export const getProducts = cache(async (): Promise<CatalogProduct[]> => {
+/** Newest first; with filters, only the products that match (see lib/catalog-filters). */
+export const getProducts = cache(async (filters?: CatalogFilters): Promise<CatalogProduct[]> => {
   const rows = await prisma.product.findMany({
-    where: listable,
+    where: filters ? buildProductWhere(filters) : listable,
     include: productInclude,
-    orderBy: { createdAt: "desc" },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
   });
-  return rows.map(toCatalogProduct);
+  const products = rows.map(toCatalogProduct);
+  return filters ? applyAggregateFilters(products, filters) : products;
+});
+
+/** Makers that have at least one listable product, for the filter list. */
+export const getMakers = cache(async (): Promise<string[]> => {
+  const rows = await prisma.product.findMany({
+    where: { ...listable, maker: { not: "" } },
+    distinct: ["maker"],
+    orderBy: { maker: "asc" },
+    select: { maker: true },
+  });
+  return rows.map((r) => r.maker);
 });
 
 export const getProductBySlug = cache(async (slug: string): Promise<CatalogProduct | null> => {
