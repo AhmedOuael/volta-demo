@@ -46,7 +46,10 @@ export default function FilterSheet({
 
   const go = (form: HTMLFormElement) => {
     const params = new URLSearchParams();
-    for (const [k, v] of new FormData(form)) if (typeof v === "string" && v.trim()) params.append(k, v.trim());
+    for (const [k, v] of new FormData(form)) {
+      // Empty fields and the default sort stay out of the URL.
+      if (typeof v === "string" && v.trim() && !(k === "sort" && v === "new")) params.append(k, v.trim());
+    }
     const qs = params.toString();
     router.push(qs ? `${action}?${qs}` : action, { scroll: false });
   };

@@ -12,10 +12,18 @@ describe.skipIf(!enabled)("resetDemo (integration, test database)", () => {
   const skus = sample.flatMap((p) => p.variants.map((_, i) => demoSku(p.slug, i)));
   const seedStock = new Map(sample.flatMap((p) => p.variants.map((v, i) => [demoSku(p.slug, i), v.stock] as const)));
   let wilayaId = "";
+  const created: string[] = []; // only these are removed afterwards; a seeded branch keeps its catalogue
 
   beforeAll(async () => {
-    await prisma.product.deleteMany({ where: { slug: { in: sample.map((p) => p.slug) } } });
     for (const p of sample) {
+      if (await prisma.product.findUnique({ where: { slug: p.slug } })) {
+        // Already seeded: push the stock off its seed value, as after a day of demo use.
+        for (const [i, v] of p.variants.entries()) {
+          await prisma.productVariant.update({ where: { sku: demoSku(p.slug, i) }, data: { physicalStock: v.stock + 7 } });
+        }
+        continue;
+      }
+      created.push(p.slug);
       await prisma.product.create({
         data: {
           slug: p.slug,
@@ -30,7 +38,7 @@ describe.skipIf(!enabled)("resetDemo (integration, test database)", () => {
   });
 
   afterAll(async () => {
-    await prisma.product.deleteMany({ where: { slug: { in: sample.map((p) => p.slug) } } });
+    await prisma.product.deleteMany({ where: { slug: { in: created } } });
     await prisma.$disconnect();
   });
 

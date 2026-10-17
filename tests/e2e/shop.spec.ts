@@ -14,41 +14,39 @@ test("home page loads with hero, products and no errors", async ({ page }) => {
   const errors = watchErrors(page);
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Shop the collection" }).first()).toBeVisible();
+  await expect(page.getByRole("link", { name: "Voir la boutique" }).first()).toBeVisible();
   await expect(page.locator('a[href^="/products/"]').first()).toBeAttached();
   expect(errors).toEqual([]);
 });
 
-test("a customer can pick a size, add to bag and reach checkout", async ({ page }) => {
+test("a customer can pick a version, add to the bag and reach checkout", async ({ page }) => {
   const errors = watchErrors(page);
-  await page.goto("/products");
+  await page.goto("/products?stock=1");
   await page.locator('a[href^="/products/"]').first().click();
   await expect(page).toHaveURL(/\/products\/[^/]+$/);
 
-  const size = page.locator("button:not([disabled])").filter({ hasText: /^(XXS|XS|S|M|L|XL|XXL|XXXL|One size|.{1,12} \/ .{1,6})$/ }).first();
-  await size.click();
-  await page.getByRole("button", { name: /add to bag/i }).click();
-  await expect(page.getByRole("button", { name: /added to bag/i })).toBeVisible();
+  // The first version in stock is preselected.
+  await page.getByRole("button", { name: "Ajouter au panier" }).click();
+  await expect(page.getByRole("button", { name: /Ajouté au panier/ })).toBeVisible();
 
   await page.goto("/cart");
-  await expect(page.getByRole("link", { name: /checkout/i })).toBeVisible();
-  await page.getByRole("link", { name: /checkout/i }).click();
+  await page.getByRole("link", { name: "Commander" }).click();
   await expect(page).toHaveURL(/\/checkout$/);
-  await expect(page.getByLabel("Full name")).toBeVisible();
-  await expect(page.getByRole("button", { name: /place order/i })).toBeVisible();
+  await expect(page.getByLabel("Nom complet")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Commander" })).toBeVisible();
   expect(errors).toEqual([]);
 });
 
 test("admin pages require a login", async ({ page }) => {
   await page.goto("/admin/orders");
   await expect(page).toHaveURL(/\/admin\/login$/);
-  await expect(page.getByLabel("Password")).toBeVisible();
+  await expect(page.getByLabel("Mot de passe")).toBeVisible();
 });
 
-test("unknown pages show the NOIR 404", async ({ page }) => {
+test("unknown pages show the 404 page", async ({ page }) => {
   const res = await page.goto("/this-page-does-not-exist");
   expect(res?.status()).toBe(404);
-  await expect(page.getByText("This page isn't here")).toBeVisible();
+  await expect(page.getByText("Cette page n'existe pas")).toBeVisible();
 });
 
 test("SEO files and security headers are served", async ({ request }) => {
