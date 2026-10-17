@@ -3,7 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { getCartVariants, type CartVariantInfo } from "@/lib/catalog";
 import { getDeliveryFee, type DeliveryType } from "@/lib/delivery";
-import { createOrder, type PlaceOrderResult } from "@/lib/orders";
+import { createOrder } from "@/lib/orders";
+import { getBrand } from "@/lib/brand/server";
+import { buildWhatsAppOrderLink } from "@/lib/whatsapp";
 import { prisma } from "@/lib/prisma";
 
 // Server Functions are reachable by direct POST, so every argument is
@@ -30,13 +32,19 @@ export async function quoteDelivery(wilayaId: unknown): Promise<Record<DeliveryT
   return { HOME: home, STOP_DESK: desk };
 }
 
-export async function placeOrder(input: unknown): Promise<PlaceOrderResult> {
-  const result = await createOrder(input);
-  if (result.ok) {
-    // Ordered items now show less available stock.
-    revalidatePath("/");
-    revalidatePath("/products");
-    for (const slug of result.slugs) revalidatePath(`/products/${slug}`);
-  }
-  return result;
+export type PlaceOrderResponse =
+  | { ok: true; orderId: string; whatsappUrl: string | null }
+  | { ok: false; error: string; field?: "fullName" | "phone" | "wilaya" | "deliveryType" | "items" };
+
+export async function placeOrder(input: unknown): Promise<PlaceOrderResponse> {
+  // The brand comes from the request (set by proxy.ts), never from the form.
+  const brand = await getBrand();
+  const result = await createOrder(input, { storeSlug: brand.slug });
+  if (!result.ok) return result;
+
+  // Ordered items now show less available stock.
+  revalidatePath("/");
+  revalidatePath("/products");
+  for (const slug of result.slugs) revalidatePath(`/products/${slug}`);
+  return { ok: true, orderId: result.orderId, whatsappUrl: buildWhatsAppOrderLink(result.summary, process.env.STORE_WHATSAPP, brand) };
 }

@@ -23,7 +23,7 @@ export default async function BuyNowPage({ params }: { params: Promise<{ variant
         <h1 className="font-display text-3xl md:text-5xl">Commande</h1>
       </div>
       {item.available > 0 ? (
-        <CheckoutForm wilayas={wilayas} buyNow={item} />
+        <CheckoutForm wilayas={wilayas} buyNow={item} demoMode={process.env.DEMO_MODE === "true"} />
       ) : (
         <div className="text-center py-24">
           <p className="text-secondary mb-8">

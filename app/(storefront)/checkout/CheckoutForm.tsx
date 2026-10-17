@@ -10,6 +10,7 @@ import { CartLine } from "../cart/CartView";
 import type { WilayaOption } from "@/lib/delivery";
 import { placeOrder, quoteDelivery } from "./actions";
 import { formatDZD } from "@/lib/format";
+import { LAST_ORDER_WHATSAPP_KEY, TEST_CUSTOMER } from "@/lib/demo";
 
 type DeliveryType = "HOME" | "STOP_DESK";
 type Field = "fullName" | "phone" | "wilaya" | "deliveryType" | "items";
@@ -26,7 +27,7 @@ const inputClass =
  * Checks out the bag, or with `buyNow` just that one item ("Buy now" on a
  * product page). Buy-now leaves the bag untouched.
  */
-export default function CheckoutForm({ wilayas, buyNow }: { wilayas: WilayaOption[]; buyNow?: CartItem }) {
+export default function CheckoutForm({ wilayas, buyNow, demoMode = false }: { wilayas: WilayaOption[]; buyNow?: CartItem; demoMode?: boolean }) {
   const router = useRouter();
   const brandHref = useBrandHref();
   const cart = useCart();
@@ -77,7 +78,7 @@ export default function CheckoutForm({ wilayas, buyNow }: { wilayas: WilayaOptio
   const total = typeof fee === "number" ? subtotal + fee : null;
   const noDelivery = !!wilayaId && !quoting && fees.HOME === null && fees.STOP_DESK === null;
 
-  if (!hydrated || placed) return <p className="text-secondary py-24 text-center">Loading…</p>;
+  if (!hydrated || placed) return <p className="text-secondary py-24 text-center">Chargement…</p>;
 
   if (items.length === 0) {
     return (
@@ -108,6 +109,12 @@ export default function CheckoutForm({ wilayas, buyNow }: { wilayas: WilayaOptio
         });
         if (result.ok) {
           setPlaced(true);
+          try {
+            if (result.whatsappUrl) sessionStorage.setItem(LAST_ORDER_WHATSAPP_KEY, result.whatsappUrl);
+            else sessionStorage.removeItem(LAST_ORDER_WHATSAPP_KEY);
+          } catch {
+            // Storage blocked: the success page simply shows no WhatsApp button.
+          }
           if (!buyNow) cart.clear();
           router.replace(brandHref(`/checkout/success?order=${result.orderId}`));
         } else {
@@ -128,6 +135,21 @@ export default function CheckoutForm({ wilayas, buyNow }: { wilayas: WilayaOptio
       <div className="space-y-10">
         <section>
           <h2 className="text-xs font-medium tracking-label uppercase mb-6">Vos coordonnées</h2>
+          {demoMode && (
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border border-outline-variant bg-surface-container-low p-4 text-sm">
+              <p>Boutique de démonstration : n&apos;entrez pas vos vraies coordonnées</p>
+              <button
+                type="button"
+                onClick={() => {
+                  setFullName(TEST_CUSTOMER.fullName);
+                  setPhone(TEST_CUSTOMER.phone);
+                }}
+                className="px-4 py-2 border border-primary text-xs font-medium tracking-label uppercase hover:bg-surface-container"
+              >
+                Remplir avec des données de test
+              </button>
+            </div>
+          )}
           <div className="space-y-5">
             <label className="block">
               <span className="text-sm mb-2 block">Nom complet</span>

@@ -26,7 +26,7 @@ const wilayas = [
   { code: "13", name: "Tlemcen" },
   { code: "14", name: "Tiaret" },
   { code: "15", name: "Tizi Ouzou" },
-  { code: "16", name: "Algiers" },
+  { code: "16", name: "Alger" },
   { code: "17", name: "Djelfa" },
   { code: "18", name: "Jijel" },
   { code: "19", name: "Sétif" },

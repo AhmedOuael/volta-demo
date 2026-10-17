@@ -3,13 +3,17 @@ import { prisma } from "./prisma";
 import { Prisma } from "./generated/prisma/client";
 import { getDeliveryFee, isDeliveryType } from "./delivery";
 import { MAX_QTY_PER_ITEM } from "./order-limits";
+import { TEST_CUSTOMER } from "./demo";
+import type { OrderSummary } from "./whatsapp";
 
 const MAX_LINES = 20;
 // Fake-order guard: open orders (not yet confirmed) allowed per phone per hour.
 const MAX_OPEN_ORDERS_PER_PHONE_PER_HOUR = 3;
+// In the demo every visitor may use the same test number, so it gets a higher cap.
+const MAX_OPEN_ORDERS_TEST_PHONE_PER_HOUR = 50;
 
 export type PlaceOrderResult =
-  | { ok: true; orderId: string; slugs: string[] }
+  | { ok: true; orderId: string; slugs: string[]; summary: OrderSummary }
   | { ok: false; error: string; field?: "fullName" | "phone" | "wilaya" | "deliveryType" | "items" };
 
 class OrderError extends Error {
@@ -35,8 +39,10 @@ const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === "obj
 /**
  * Creates a NEW cash-on-delivery order. `input` comes straight from the browser,
  * so everything is validated here and prices/fees are recomputed server-side.
+ * `ctx.storeSlug` is the brand the order was placed on; it comes from the server
+ * (the request's brand), never from the browser.
  */
-export async function createOrder(input: unknown): Promise<PlaceOrderResult> {
+export async function createOrder(input: unknown, ctx: { storeSlug: string }): Promise<PlaceOrderResult> {
   if (!isRecord(input)) return { ok: false, error: "Requête invalide." };
 
   // Honeypot: a hidden field real customers never fill in.
@@ -111,7 +117,8 @@ export async function createOrder(input: unknown): Promise<PlaceOrderResult> {
           createdAt: { gte: new Date(Date.now() - 60 * 60 * 1000) },
         },
       });
-      if (openOrders >= MAX_OPEN_ORDERS_PER_PHONE_PER_HOUR) {
+      const isDemoTestPhone = process.env.DEMO_MODE === "true" && phone === normalizePhone(TEST_CUSTOMER.phone);
+      if (openOrders >= (isDemoTestPhone ? MAX_OPEN_ORDERS_TEST_PHONE_PER_HOUR : MAX_OPEN_ORDERS_PER_PHONE_PER_HOUR)) {
         throw new OrderError("Vous avez déjà des commandes en attente de confirmation. Nous vous appellerons très bientôt.", null);
       }
 
@@ -154,6 +161,7 @@ export async function createOrder(input: unknown): Promise<PlaceOrderResult> {
           deliveryFee,
           total: subtotal.add(deliveryFee),
           status: "NEW",
+          storeSlug: ctx.storeSlug,
           items: {
             create: lines.map((line) => {
               const v = byId.get(line.variantId)!;
@@ -172,7 +180,20 @@ export async function createOrder(input: unknown): Promise<PlaceOrderResult> {
         select: { id: true },
       });
 
-      return { orderId: order.id.toString(), slugs: [...new Set(variants.map((v) => v.product.slug))] };
+      const orderId = order.id.toString();
+      const summary: OrderSummary = {
+        orderId,
+        customerName: fullName,
+        items: lines.map((line) => {
+          const v = byId.get(line.variantId)!;
+          return { name: v.product.name, version: [v.size, v.color].filter(Boolean).join(" · ") || null, quantity: line.quantity, unitPrice: v.price.toNumber() };
+        }),
+        wilaya: wilaya.name,
+        commune: null, // chosen with the customer on the confirmation call
+        deliveryFee: deliveryFee.toNumber(),
+        total: subtotal.add(deliveryFee).toNumber(),
+      };
+      return { orderId, slugs: [...new Set(variants.map((v) => v.product.slug))], summary };
     });
 
     return { ok: true, ...result };

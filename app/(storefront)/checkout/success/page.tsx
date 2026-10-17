@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "@/components/brand/BrandLink";
+import WhatsAppButton from "./WhatsAppButton";
 
 export const metadata: Metadata = { title: "Commande reçue", robots: { index: false, follow: false } };
 
@@ -16,10 +17,15 @@ export default async function OrderSuccessPage({
       <p className="text-xs tracking-label uppercase text-secondary mb-4">Merci</p>
       <h1 className="font-display text-3xl md:text-5xl mb-6">Commande reçue</h1>
       {orderNumber && <p className="text-sm mb-6">Commande n° <span className="font-semibold">#{orderNumber}</span></p>}
-      <p className="text-on-surface-variant mb-12">
+      <p className="text-on-surface-variant mb-10">
         Nous allons vous appeler très bientôt pour confirmer la commande et l&apos;adresse de livraison. Gardez votre téléphone à portée de main.
         Vous paierez en espèces à la réception.
       </p>
+      {orderNumber && (
+        <div className="mb-6">
+          <WhatsAppButton orderNumber={orderNumber} />
+        </div>
+      )}
       <Link
         href="/products"
         className="inline-block bg-primary text-on-primary px-10 py-4 rounded-full text-sm font-medium tracking-label uppercase hover:opacity-90 transition-opacity"

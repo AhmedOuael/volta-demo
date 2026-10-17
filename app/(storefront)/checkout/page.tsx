@@ -16,7 +16,7 @@ export default async function CheckoutPage() {
         <p className="text-xs tracking-label uppercase text-secondary mb-2">Paiement à la livraison</p>
         <h1 className="font-display text-3xl md:text-5xl">Commande</h1>
       </div>
-      <CheckoutForm wilayas={wilayas} />
+      <CheckoutForm wilayas={wilayas} demoMode={process.env.DEMO_MODE === "true"} />
     </div>
   );
 }

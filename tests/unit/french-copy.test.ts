@@ -27,16 +27,17 @@ describe("order status labels", () => {
 });
 
 describe("checkout validation messages", () => {
+  const ctx = { storeSlug: "volta" };
   it("rejects a malformed request in French", async () => {
-    expect(await createOrder(null)).toEqual({ ok: false, error: "Requête invalide." });
+    expect(await createOrder(null, ctx)).toEqual({ ok: false, error: "Requête invalide." });
   });
 
   it("asks for the full name", async () => {
-    expect(await createOrder({ fullName: "A" })).toEqual({ ok: false, field: "fullName", error: "Entrez votre nom complet." });
+    expect(await createOrder({ fullName: "A" }, ctx)).toEqual({ ok: false, field: "fullName", error: "Entrez votre nom complet." });
   });
 
   it("asks for a valid Algerian mobile", async () => {
-    expect(await createOrder({ fullName: "Client Démo", phone: "123" })).toEqual({
+    expect(await createOrder({ fullName: "Client Démo", phone: "123" }, ctx)).toEqual({
       ok: false,
       field: "phone",
       error: "Entrez un numéro de mobile valide (05, 06 ou 07…).",
@@ -44,7 +45,7 @@ describe("checkout validation messages", () => {
   });
 
   it("asks for a delivery type", async () => {
-    expect(await createOrder({ fullName: "Client Démo", phone: "0555000000", deliveryType: "X" })).toEqual({
+    expect(await createOrder({ fullName: "Client Démo", phone: "0555000000", deliveryType: "X" }, ctx)).toEqual({
       ok: false,
       field: "deliveryType",
       error: "Choisissez la livraison à domicile ou au bureau de livraison.",
