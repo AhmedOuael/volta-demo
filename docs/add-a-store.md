@@ -34,3 +34,11 @@ the store's official site. About 15 minutes per store.
 Orders placed on a preview are stored with that store's slug and only appear in its dashboard. The
 WhatsApp message they open starts with `[Démo <name>]`. Everything is wiped every night at 03:00 UTC
 (`.github/workflows/reset-demo.yml`).
+
+## One site per store (shorter link)
+
+To send `https://<name>.netlify.app` instead of `/p/<slug>`, deploy the same repo as its own Netlify
+site and set the environment variable `NEXT_PUBLIC_DEFAULT_BRAND=<slug>` before the build (changing it
+needs a redeploy). That store then opens at the bare address, `/p/<slug>` links keep working, Volta and
+every other brand return 404, and the whole site is noindex (robots.txt disallows everything, empty
+sitemap). A slug that isn't in `brands/index.ts` fails the build.

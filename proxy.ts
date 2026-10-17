@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { getBrandBySlug } from "@/brands";
+import { DEFAULT_BRAND_SLUG, SINGLE_BRAND_SITE, getBrandBySlug, getDefaultBrand } from "@/brands";
 import { BRAND_HEADER, brandHref, parsePreviewPath } from "@/lib/brand/routing";
 
 // Optimistic admin check only (no DB): bounce visitors without a session cookie to
@@ -19,15 +19,20 @@ export function proxy(request: NextRequest) {
     // Only proxy.ts may set the brand: drop any x-brand a client sent.
     const headers = new Headers(request.headers);
     headers.delete(BRAND_HEADER);
-    return NextResponse.next({ request: { headers } });
+    const response = NextResponse.next({ request: { headers } });
+    // A site whose default store is a private preview is never indexed.
+    if (getDefaultBrand().visibility === "private") response.headers.set("X-Robots-Tag", NOINDEX);
+    return response;
   }
 
   const slug = preview.slug.toLowerCase();
-  if (slug !== preview.slug && getBrandBySlug(slug)) {
+  // On a one-store site only that store exists; other slugs fall through to the 404 below.
+  const reachable = (s: string) => Boolean(getBrandBySlug(s)) && (!SINGLE_BRAND_SITE || s === DEFAULT_BRAND_SLUG);
+  if (slug !== preview.slug && reachable(slug)) {
     return NextResponse.redirect(new URL(`/p/${slug}${preview.rest === "/" ? "" : preview.rest}${search}`, request.url), 308);
   }
   // Unknown brand: no rewrite, so no route matches and Next renders the 404 page.
-  if (!getBrandBySlug(slug)) return NextResponse.next();
+  if (!reachable(slug)) return NextResponse.next();
 
   if (needsLogin(request, preview.rest)) {
     return NextResponse.redirect(new URL(brandHref("/admin/login", slug), request.url));
