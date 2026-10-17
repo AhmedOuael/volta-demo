@@ -38,6 +38,7 @@ export type OrderListRow = {
 };
 
 export async function listOrders(params: {
+  storeSlug: string; // the brand whose admin is open; each brand sees only its own orders
   status?: string;
   stage?: string;
   from?: string; // YYYY-MM-DD, Algeria time, inclusive
@@ -45,7 +46,7 @@ export async function listOrders(params: {
   q?: string;
   page?: number;
 }) {
-  const where: Prisma.OrderWhereInput = {};
+  const where: Prisma.OrderWhereInput = { storeSlug: params.storeSlug };
   if (isOrderStatus(params.status)) where.status = params.status;
   else if (isOrderStage(params.stage)) where.status = { in: ORDER_STAGES[params.stage].statuses };
 
@@ -83,7 +84,7 @@ export async function listOrders(params: {
       },
     }),
     prisma.order.count({ where }),
-    prisma.order.groupBy({ by: ["status"], _count: { _all: true } }),
+    prisma.order.groupBy({ by: ["status"], where: { storeSlug: params.storeSlug }, _count: { _all: true } }),
   ]);
 
   const counts = Object.fromEntries(ORDER_STATUSES.map((s) => [s, 0])) as Record<OrderStatus, number>;
@@ -132,10 +133,10 @@ export type OrderDetail = {
   timeline: { status: OrderStatus; at: string; by: string | null }[];
 };
 
-export async function getOrderDetail(idParam: string): Promise<OrderDetail | null> {
+export async function getOrderDetail(idParam: string, storeSlug: string): Promise<OrderDetail | null> {
   if (!/^\d{1,18}$/.test(idParam)) return null;
-  const order = await prisma.order.findUnique({
-    where: { id: BigInt(idParam) },
+  const order = await prisma.order.findFirst({
+    where: { id: BigInt(idParam), storeSlug },
     include: {
       customer: true,
       wilaya: true,
@@ -151,7 +152,7 @@ export async function getOrderDetail(idParam: string): Promise<OrderDetail | nul
   const [byStatus, communes] = await Promise.all([
     prisma.order.groupBy({
       by: ["status"],
-      where: { customer: { phone: order.customer.phone } },
+      where: { customer: { phone: order.customer.phone }, storeSlug },
       _count: { _all: true },
     }),
     getCommuneOptions(order.wilayaId),

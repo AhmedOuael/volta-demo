@@ -32,7 +32,7 @@ export function buildWhatsAppOrderLink(summary: OrderSummary, phone: string | un
     lines.push(`• ${item.quantity} × ${item.name}${version} — ${formatDZD(item.unitPrice * item.quantity)}`);
   }
   const more = summary.items.length - MAX_ITEM_LINES;
-  if (more > 0) lines.push(`+${more} article${more === 1 ? "" : "s"}`);
+  if (more > 0) lines.push(`+${more} article${more <= 1 ? "" : "s"}`);
   const place = summary.commune ? `${summary.commune}, ${summary.wilaya}` : summary.wilaya;
   lines.push(`Livraison : ${place} — ${formatDZD(summary.deliveryFee)}`);
   lines.push(`Total : ${formatDZD(summary.total)}`);

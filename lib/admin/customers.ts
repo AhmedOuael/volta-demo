@@ -23,10 +23,10 @@ export type ClientRow = ClientStats & {
 
 const emptyStats = (): ClientStats => ({ orders: 0, delivered: 0, refusedOrReturned: 0, canceled: 0, spent: 0 });
 
-async function statsFor(customerIds: bigint[]) {
+async function statsFor(customerIds: bigint[], storeSlug: string) {
   const grouped = await prisma.order.groupBy({
     by: ["customerId", "status"],
-    where: { customerId: { in: customerIds } },
+    where: { customerId: { in: customerIds }, storeSlug },
     _count: { _all: true },
     _sum: { total: true },
     _max: { createdAt: true },
@@ -48,9 +48,10 @@ async function statsFor(customerIds: bigint[]) {
   return stats;
 }
 
-export async function listClients(params: { q?: string; page?: number }) {
+/** Customers who ordered on this brand (customers are shared, matched by phone). */
+export async function listClients(params: { storeSlug: string; q?: string; page?: number }) {
   const q = params.q?.trim();
-  const where: Prisma.CustomerWhereInput = {};
+  const where: Prisma.CustomerWhereInput = { orders: { some: { storeSlug: params.storeSlug } } };
   if (q) {
     const digits = q.replace(/[\s.\-+]/g, "");
     where.OR = /^\d+$/.test(digits)
@@ -70,7 +71,7 @@ export async function listClients(params: { q?: string; page?: number }) {
     }),
     prisma.customer.count({ where }),
   ]);
-  const stats = await statsFor(rows.map((c) => c.id));
+  const stats = await statsFor(rows.map((c) => c.id), params.storeSlug);
 
   return {
     page,
@@ -99,20 +100,21 @@ export type ClientDetail = ClientRow & {
   orderList: { id: string; createdAt: string; status: OrderStatus; total: number; items: number; wilaya: string }[];
 };
 
-export async function getClient(idParam: string): Promise<ClientDetail | null> {
+export async function getClient(idParam: string, storeSlug: string): Promise<ClientDetail | null> {
   if (!/^\d{1,18}$/.test(idParam)) return null;
-  const c = await prisma.customer.findUnique({
-    where: { id: BigInt(idParam) },
+  const c = await prisma.customer.findFirst({
+    where: { id: BigInt(idParam), orders: { some: { storeSlug } } },
     include: {
       wilaya: { select: { code: true, name: true } },
       orders: {
+        where: { storeSlug },
         orderBy: { createdAt: "desc" },
         include: { wilaya: { select: { code: true, name: true } }, items: { select: { quantity: true } } },
       },
     },
   });
   if (!c) return null;
-  const s = (await statsFor([c.id])).get(c.id.toString()) ?? { ...emptyStats(), last: null };
+  const s = (await statsFor([c.id], storeSlug)).get(c.id.toString()) ?? { ...emptyStats(), last: null };
 
   return {
     id: c.id.toString(),

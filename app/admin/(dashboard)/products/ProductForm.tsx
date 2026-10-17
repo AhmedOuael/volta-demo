@@ -326,7 +326,7 @@ export default function ProductForm({
                   value={v.physicalStock}
                   onChange={(e) => setVariant(i, { physicalStock: Math.max(0, Math.trunc(Number(e.target.value) || 0)) })}
                 />
-                {!!v.reservedStock && <span className="block text-[11px] text-secondary mt-1">{v.reservedStock} réservé{v.reservedStock === 1 ? "" : "s"}</span>}
+                {!!v.reservedStock && <span className="block text-[11px] text-secondary mt-1">{v.reservedStock} réservé{v.reservedStock <= 1 ? "" : "s"}</span>}
               </label>
               <label className="flex items-center gap-2 md:w-14 md:justify-center h-10.5 text-sm">
                 <input type="checkbox" checked={v.active} onChange={(e) => setVariant(i, { active: e.target.checked })} className="accent-primary" aria-label="En vente" />

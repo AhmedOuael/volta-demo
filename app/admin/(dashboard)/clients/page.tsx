@@ -2,6 +2,7 @@ import Link from "@/components/brand/BrandLink";
 import { requireUser } from "@/lib/auth/session";
 import { listClients } from "@/lib/admin/customers";
 import { formatDateTime, formatDZD, formatPhone } from "@/lib/format";
+import { getBrand } from "@/lib/brand/server";
 
 type SearchParams = Promise<{ q?: string; page?: string }>;
 
@@ -18,7 +19,7 @@ export default async function ClientsPage({ searchParams }: { searchParams: Sear
   const sp = await searchParams;
   const q = sp.q?.trim() || undefined;
   const page = Math.max(1, Number(sp.page) || 1);
-  const { rows, total, pageCount } = await listClients({ q, page });
+  const { rows, total, pageCount } = await listClients({ storeSlug: (await getBrand()).slug, q, page });
 
   return (
     <div>
@@ -101,7 +102,7 @@ export default async function ClientsPage({ searchParams }: { searchParams: Sear
                 </div>
                 <div className="text-sm text-secondary">{formatPhone(c.phone)} · {c.wilaya}</div>
                 <div className="text-xs mt-2">
-                  {c.orders} commande{c.orders === 1 ? "" : "s"} · {c.delivered} livrée{c.delivered === 1 ? "" : "s"}
+                  {c.orders} commande{c.orders <= 1 ? "" : "s"} · {c.delivered} livrée{c.delivered <= 1 ? "" : "s"}
                   {c.refusedOrReturned > 0 && <span className="text-error font-semibold"> · {c.refusedOrReturned} refusée(s)/retournée(s)</span>}
                 </div>
               </Link>

@@ -3,7 +3,7 @@ import { listUsers } from "@/lib/admin/users";
 import TeamManager from "./TeamManager";
 
 export default async function UsersPage() {
-  const me = await requireUser("ADMIN");
+  const me = await requireUser("ADMIN", { allowDemo: false });
   const users = await listUsers();
 
   return (

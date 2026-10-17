@@ -52,7 +52,7 @@ export default function TeamManager({ users, currentUserId }: { users: UserRow[]
           <div key={u.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4">
             <div className={u.active ? "" : "opacity-50"}>
               <div className="text-sm font-medium">
-                {u.name || "—"} <span className="ml-2 text-[10px] tracking-label uppercase text-secondary">{u.role === "ADMIN" ? "Administrateur" : "Équipe"}</span>
+                {u.name || "—"} <span className="ml-2 text-[10px] tracking-label uppercase text-secondary">{u.role === "ADMIN" ? "Administrateur" : u.role === "DEMO" ? "Démo" : "Équipe"}</span>
                 {!u.active && <span className="ml-2 text-[10px] tracking-label uppercase text-error">Désactivé</span>}
               </div>
               <div className="text-xs text-secondary">{u.email}</div>

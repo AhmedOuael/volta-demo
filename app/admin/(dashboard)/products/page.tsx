@@ -50,13 +50,13 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
                     {p.limited && <span className="text-[10px] font-semibold uppercase tracking-label px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 ring-1 ring-inset ring-amber-200">Édition limitée</span>}
                   </div>
                   <p className="text-xs text-secondary mt-0.5 truncate">
-                    {[p.categories.join(", ") || "Sans catégorie", `${p.sizes} variante${p.sizes === 1 ? "" : "s"}`].join(" · ")}
+                    {[p.categories.join(", ") || "Sans catégorie", `${p.sizes} variante${p.sizes <= 1 ? "" : "s"}`].join(" · ")}
                   </p>
                 </div>
                 <div className="hidden sm:block text-sm text-right whitespace-nowrap">{p.sizes ? price(p) : "—"}</div>
                 <div className={`w-24 text-right text-sm whitespace-nowrap ${p.available === 0 ? "text-error font-semibold" : ""}`}>
                   {p.available} en stock
-                  {p.reserved > 0 && <div className="text-xs text-secondary">{p.reserved} réservé{p.reserved === 1 ? "" : "s"}</div>}
+                  {p.reserved > 0 && <div className="text-xs text-secondary">{p.reserved} réservé{p.reserved <= 1 ? "" : "s"}</div>}
                 </div>
               </Link>
             </li>

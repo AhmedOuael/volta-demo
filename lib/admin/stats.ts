@@ -86,14 +86,16 @@ export type Overview = {
 
 const n = (v: unknown) => (v == null ? 0 : Number(v));
 
-export async function getOverview(period: PeriodKey, now = new Date()): Promise<Overview> {
+export async function getOverview(period: PeriodKey, storeSlug: string, now = new Date()): Promise<Overview> {
   const { from, bucket } = periodRange(period, now);
-  const created = from ? { createdAt: { gte: from } } : {};
+  const store = { storeSlug };
+  const created = from ? { ...store, createdAt: { gte: from } } : store;
   const today = startOfDay(now);
   // Raw-SQL fragments for "delivered within the period"
   // Buckets come back as text keys (YYYY-MM-DD or YYYY-MM): no driver timezone conversion.
   const fmt = bucket === "day" ? "YYYY-MM-DD" : "YYYY-MM";
   const deliveredSince = from ? Prisma.sql`AND h."createdAt" >= ${from}` : Prisma.empty;
+  const inStore = Prisma.sql`AND o."storeSlug" = ${storeSlug}`;
 
   const [
     periodCount,
@@ -111,13 +113,13 @@ export async function getOverview(period: PeriodKey, now = new Date()): Promise<
     lowStockRows,
   ] = await Promise.all([
     prisma.order.count({ where: created }),
-    prisma.order.count({ where: { createdAt: { gte: today } } }),
-    prisma.order.count(),
-    prisma.order.count({ where: { status: { in: PENDING } } }),
+    prisma.order.count({ where: { ...store, createdAt: { gte: today } } }),
+    prisma.order.count({ where: store }),
+    prisma.order.count({ where: { ...store, status: { in: PENDING } } }),
     prisma.order.groupBy({ by: ["status"], where: created, _count: { _all: true } }),
     prisma.order.groupBy({ by: ["deliveryType"], where: { ...created, status: { not: "CANCELED" } }, _count: { _all: true } }),
     prisma.order.aggregate({
-      where: { status: { in: IN_TRANSIT } },
+      where: { ...store, status: { in: IN_TRANSIT } },
       _sum: { subtotal: true, discount: true },
       _count: { _all: true },
     }),
@@ -128,18 +130,18 @@ export async function getOverview(period: PeriodKey, now = new Date()): Promise<
              COUNT(*) AS delivered
       FROM "Order" o
       JOIN "OrderStatusHistory" h ON h."orderId" = o."id" AND h."status" = 'DELIVERED'
-      WHERE o."status" = 'DELIVERED' ${deliveredSince}`,
+      WHERE o."status" = 'DELIVERED' ${deliveredSince} ${inStore}`,
     prisma.$queryRaw<{ bucket: string; orders: unknown }[]>`
       SELECT to_char(o."createdAt" AT TIME ZONE ${TZ}, ${fmt}) AS bucket, COUNT(*) AS orders
       FROM "Order" o
-      ${from ? Prisma.sql`WHERE o."createdAt" >= ${from}` : Prisma.empty}
+      WHERE TRUE ${inStore} ${from ? Prisma.sql`AND o."createdAt" >= ${from}` : Prisma.empty}
       GROUP BY 1`,
     prisma.$queryRaw<{ bucket: string; revenue: unknown }[]>`
       SELECT to_char(h."createdAt" AT TIME ZONE ${TZ}, ${fmt}) AS bucket,
              SUM(o."subtotal" - o."discount") AS revenue
       FROM "Order" o
       JOIN "OrderStatusHistory" h ON h."orderId" = o."id" AND h."status" = 'DELIVERED'
-      WHERE o."status" = 'DELIVERED' ${deliveredSince}
+      WHERE o."status" = 'DELIVERED' ${deliveredSince} ${inStore}
       GROUP BY 1`,
     prisma.$queryRaw<{ id: bigint; name: string; revenue: unknown; units: unknown }[]>`
       SELECT p."id", p."name", SUM(i."priceAtPurchase" * i."quantity") AS revenue, SUM(i."quantity") AS units
@@ -148,14 +150,14 @@ export async function getOverview(period: PeriodKey, now = new Date()): Promise<
       JOIN "OrderStatusHistory" h ON h."orderId" = o."id" AND h."status" = 'DELIVERED'
       JOIN "ProductVariant" v ON v."id" = i."variantId"
       JOIN "Product" p ON p."id" = v."productId"
-      WHERE TRUE ${deliveredSince}
+      WHERE TRUE ${deliveredSince} ${inStore}
       GROUP BY p."id", p."name"
       ORDER BY revenue DESC
       LIMIT 8`,
     prisma.$queryRaw<{ name: string; code: string; orders: unknown }[]>`
       SELECT w."name", w."code", COUNT(*) AS orders
       FROM "Order" o JOIN "Wilaya" w ON w."id" = o."wilayaId"
-      WHERE o."status" <> 'CANCELED' ${from ? Prisma.sql`AND o."createdAt" >= ${from}` : Prisma.empty}
+      WHERE o."status" <> 'CANCELED' ${inStore} ${from ? Prisma.sql`AND o."createdAt" >= ${from}` : Prisma.empty}
       GROUP BY w."name", w."code"
       ORDER BY orders DESC, w."code"
       LIMIT 8`,

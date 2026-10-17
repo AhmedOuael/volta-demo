@@ -1,7 +1,9 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { prisma } from "@/lib/prisma";
 import { createOrder } from "@/lib/orders";
-import { changeOrderStatus } from "@/lib/admin/orders";
+import { changeOrderStatus, getOrderDetail, listOrders } from "@/lib/admin/orders";
+import { getClient, listClients } from "@/lib/admin/customers";
+import { getOverview } from "@/lib/admin/stats";
 import { TEST_CUSTOMER } from "@/lib/demo";
 
 // Runs only with TEST_DATABASE_URL set (a Neon branch). tests/setup.ts points
@@ -101,5 +103,30 @@ describe.skipIf(!enabled)("orders (integration, test database)", () => {
     } finally {
       process.env.DEMO_MODE = previous;
     }
+  });
+
+  it("shows each brand only its own orders and clients in the admin", async () => {
+    const am = await order(PHONES[7], 1, {}, "advancedmedia");
+    if (!am.ok) throw new Error(am.error);
+
+    const amOrders = await listOrders({ storeSlug: "advancedmedia" });
+    expect(amOrders.rows.length).toBeGreaterThan(0);
+    for (const row of amOrders.rows) {
+      const saved = await prisma.order.findUniqueOrThrow({ where: { id: BigInt(row.id) } });
+      expect(saved.storeSlug).toBe("advancedmedia");
+    }
+    expect((await listOrders({ storeSlug: "volta" })).rows.map((r) => r.id)).not.toContain(am.orderId);
+    expect(Object.values(amOrders.counts).reduce((a, b) => a + b, 0)).toBe(amOrders.total);
+
+    expect(await getOrderDetail(am.orderId, "volta")).toBeNull();
+    expect((await getOrderDetail(am.orderId, "advancedmedia"))?.id).toBe(am.orderId);
+
+    const client = (await listClients({ storeSlug: "advancedmedia", q: PHONES[7] })).rows[0];
+    expect(client?.orders).toBe(1);
+    expect(await listClients({ storeSlug: "volta", q: PHONES[7] })).toMatchObject({ rows: [] });
+    expect(await getClient(client.id, "volta")).toBeNull();
+
+    const overview = await getOverview("all", "advancedmedia");
+    expect(overview.orders.allTime).toBe(amOrders.total);
   });
 });

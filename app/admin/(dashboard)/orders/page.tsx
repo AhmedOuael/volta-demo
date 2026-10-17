@@ -4,6 +4,7 @@ import { listOrders } from "@/lib/admin/orders";
 import { ORDER_STAGES, ORDER_STATUSES, STATUS_LABELS, isOrderStage, isOrderStatus } from "@/lib/order-status";
 import { formatDateTime, formatDZD, formatPhone } from "@/lib/format";
 import StatusBadge, { STATUS_COLORS } from "@/components/admin/StatusBadge";
+import { getBrand } from "@/lib/brand/server";
 
 type SearchParams = Promise<{ status?: string; stage?: string; from?: string; to?: string; q?: string; page?: string }>;
 type Filters = { status?: string; stage?: string; from?: string; to?: string; q?: string; page?: number };
@@ -35,7 +36,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Searc
   const page = Math.max(1, Number(sp.page) || 1);
   const dates = { from, to };
 
-  const { rows, total, pageCount, counts } = await listOrders({ status, stage, from, to, q, page });
+  const { rows, total, pageCount, counts } = await listOrders({ storeSlug: (await getBrand()).slug, status, stage, from, to, q, page });
   const dateLabel = from && to && from === to ? formatDay(from) : from && to ? `${formatDay(from)} – ${formatDay(to)}` : from ? `Depuis le ${formatDay(from)}` : to ? `Jusqu'au ${formatDay(to)}` : null;
   const allCount = Object.values(counts).reduce((a, b) => a + b, 0);
 

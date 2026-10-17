@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "@/components/brand/BrandLink";
 import { usePathname } from "next/navigation";
 import { stripPreviewPrefix } from "@/lib/brand/routing";
+import type { Role } from "@/lib/auth/session";
 import { useBrand } from "@/components/brand/BrandProvider";
 import { LayoutDashboard, Menu, Package, ShoppingBag, Users, UserCog, X, LogOut } from "lucide-react";
 
@@ -12,11 +13,13 @@ const NAV = [
   { href: "/admin/orders", label: "Commandes", icon: ShoppingBag, adminOnly: false },
   { href: "/admin/products", label: "Produits", icon: Package, adminOnly: true },
   { href: "/admin/clients", label: "Clients", icon: Users, adminOnly: false },
-  { href: "/admin/users", label: "Équipe", icon: UserCog, adminOnly: true },
+  { href: "/admin/users", label: "Équipe", icon: UserCog, adminOnly: true, hiddenForDemo: true },
 ];
 
+const ROLE_LABEL: Record<Role, string> = { ADMIN: "Administrateur", STAFF: "Équipe", DEMO: "Démo (lecture seule)" };
+
 type Props = {
-  user: { name: string; email: string; role: "ADMIN" | "STAFF" };
+  user: { name: string; email: string; role: Role };
   logoutAction: () => Promise<void>;
 };
 
@@ -24,7 +27,10 @@ export default function Sidebar({ user, logoutAction }: Props) {
   const pathname = stripPreviewPrefix(usePathname());
   const brand = useBrand();
   const [open, setOpen] = useState(false);
-  const items = NAV.filter((item) => !item.adminOnly || user.role === "ADMIN");
+  // DEMO sees what an admin sees, except the team (real emails).
+  const items = NAV.filter((item) =>
+    user.role === "DEMO" ? !("hiddenForDemo" in item && item.hiddenForDemo) : !item.adminOnly || user.role === "ADMIN"
+  );
 
   // Close the mobile drawer after navigating.
   const [lastPath, setLastPath] = useState(pathname);
@@ -73,7 +79,7 @@ export default function Sidebar({ user, logoutAction }: Props) {
       </ul>
       <div className="shrink-0 border-t border-outline-variant px-6 py-4">
         <p className="text-sm truncate">{user.name || user.email}</p>
-        <p className="text-xs text-secondary mb-3">{user.role === "ADMIN" ? "Administrateur" : "Équipe"}</p>
+        <p className="text-xs text-secondary mb-3">{ROLE_LABEL[user.role]}</p>
         <form action={logoutAction}>
           <button className="flex items-center gap-2 text-sm text-secondary hover:text-primary">
             <LogOut size={16} aria-hidden="true" /> Se déconnecter

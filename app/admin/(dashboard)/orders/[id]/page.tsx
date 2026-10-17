@@ -7,6 +7,7 @@ import { formatDateTime, formatDZD, formatPhone } from "@/lib/format";
 import StatusBadge from "@/components/admin/StatusBadge";
 import DeliveryDetailsForm from "./DeliveryDetailsForm";
 import StatusActions from "./StatusActions";
+import { getBrand } from "@/lib/brand/server";
 
 const card = "border border-outline-variant p-5";
 const cardTitle = "text-[11px] font-semibold tracking-label uppercase text-secondary mb-4";
@@ -14,7 +15,7 @@ const cardTitle = "text-[11px] font-semibold tracking-label uppercase text-secon
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   await requireUser();
   const { id } = await params;
-  const order = await getOrderDetail(id);
+  const order = await getOrderDetail(id, (await getBrand()).slug);
   if (!order) notFound();
 
   const previous = order.history.total - 1;

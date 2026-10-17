@@ -9,9 +9,9 @@ import { PrismaClient } from "../lib/generated/prisma/client";
 import { hashPassword, MIN_PASSWORD_LENGTH } from "../lib/auth/password";
 import { CATEGORIES } from "../lib/categories";
 import { DEMO_PRODUCTS, demoImage, demoSku } from "./data/demo-products";
+import { DEMO_EMAIL } from "../lib/demo";
 
 const ADMIN_EMAIL = "willou@ahmedouael.com";
-const DEMO_EMAIL = "demo@ahmedouael.com";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter: new PrismaPg(pool) });

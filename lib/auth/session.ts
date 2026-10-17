@@ -9,7 +9,8 @@ import { prisma } from "../prisma";
 export const SESSION_COOKIE = "noir_admin_session";
 const SESSION_DAYS = 7;
 
-export type Role = "ADMIN" | "STAFF";
+// DEMO: the shared read-only login of the demo store; it sees what an ADMIN sees but can't change anything.
+export type Role = "ADMIN" | "STAFF" | "DEMO";
 
 /** Safe-to-render user shape (never includes the password hash). */
 export type SessionUser = { id: bigint; email: string; name: string; role: Role };
@@ -55,10 +56,13 @@ export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
 /**
  * Use at the top of every admin page AND every admin Server Action
  * (actions are reachable by direct POST, so the proxy/layout check isn't enough).
+ * "ADMIN" pages also open for DEMO, read-only: mutating actions must still call
+ * assertCanWrite(). Pass { allowDemo: false } for pages DEMO must not see (team).
  */
-export async function requireUser(role?: Role): Promise<SessionUser> {
+export async function requireUser(role?: "ADMIN", { allowDemo = true }: { allowDemo?: boolean } = {}): Promise<SessionUser> {
   const user = await getCurrentUser();
   if (!user) redirect(await serverBrandHref("/admin/login"));
-  if (role === "ADMIN" && user.role !== "ADMIN") redirect(await serverBrandHref("/admin/orders"));
+  const allowed = user.role === "ADMIN" || (allowDemo && user.role === "DEMO");
+  if (role === "ADMIN" && !allowed) redirect(await serverBrandHref("/admin/orders"));
   return user;
 }

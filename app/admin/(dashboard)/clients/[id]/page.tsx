@@ -4,13 +4,14 @@ import { requireUser } from "@/lib/auth/session";
 import { getClient } from "@/lib/admin/customers";
 import { formatDateTime, formatDZD, formatPhone } from "@/lib/format";
 import StatusBadge from "@/components/admin/StatusBadge";
+import { getBrand } from "@/lib/brand/server";
 
 const card = "border border-outline-variant p-5";
 
 export default async function ClientPage({ params }: { params: Promise<{ id: string }> }) {
   await requireUser();
   const { id } = await params;
-  const client = await getClient(id);
+  const client = await getClient(id, (await getBrand()).slug);
   if (!client) notFound();
 
   const stats = [

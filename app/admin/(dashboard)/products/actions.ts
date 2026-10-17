@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth/session";
+import { assertCanWrite } from "@/lib/auth/permissions";
 import { createCategory, deleteProduct, saveProduct, type SaveProductResult } from "@/lib/admin/products";
 import type { ActionResult } from "@/lib/admin/orders";
 
@@ -14,7 +15,8 @@ function refreshStorefront(slugs: string[]) {
 }
 
 export async function saveProductAction(productId: string | null, input: unknown): Promise<SaveProductResult> {
-  await requireUser("ADMIN");
+  const denied = assertCanWrite(await requireUser("ADMIN"));
+  if (denied) return denied;
   const result = await saveProduct(typeof productId === "string" ? productId : null, input);
   if (result.ok) {
     refreshStorefront(result.slugs ?? []);
@@ -24,7 +26,8 @@ export async function saveProductAction(productId: string | null, input: unknown
 }
 
 export async function deleteProductAction(productId: string): Promise<ActionResult & { archived?: boolean }> {
-  await requireUser("ADMIN");
+  const denied = assertCanWrite(await requireUser("ADMIN"));
+  if (denied) return denied;
   const result = await deleteProduct(String(productId));
   if (result.ok) {
     refreshStorefront(result.slug ? [result.slug] : []);
@@ -34,6 +37,7 @@ export async function deleteProductAction(productId: string): Promise<ActionResu
 }
 
 export async function createCategoryAction(name: unknown) {
-  await requireUser("ADMIN");
+  const denied = assertCanWrite(await requireUser("ADMIN"));
+  if (denied) return denied;
   return createCategory(name);
 }

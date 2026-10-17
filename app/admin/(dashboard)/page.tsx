@@ -3,6 +3,7 @@ import { requireUser } from "@/lib/auth/session";
 import { DEFAULT_PERIOD, PERIODS, algiersDate, getOverview, isPeriod, type PeriodKey } from "@/lib/admin/stats";
 import { formatDZD } from "@/lib/format";
 import { RankedBars, TrendColumns, TrendLine } from "@/components/admin/charts";
+import { getBrand } from "@/lib/brand/server";
 
 const card = "border border-outline-variant bg-surface p-5";
 const tileLink = `${card} block transition-colors hover:border-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary`;
@@ -56,7 +57,7 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
   await requireUser("ADMIN"); // revenue is owner-level; staff are sent to Orders
   const sp = await searchParams;
   const period: PeriodKey = isPeriod(sp.period) ? sp.period : DEFAULT_PERIOD;
-  const o = await getOverview(period);
+  const o = await getOverview(period, (await getBrand()).slug);
   const today = algiersDate(new Date());
   const scope = SCOPE[period];
   const bucketWord = o.bucket === "day" ? "par jour" : "par mois";
@@ -89,7 +90,7 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
           <p className={label}>Chiffre d'affaires, {scope}</p>
           <p className="mt-2 text-5xl font-semibold tracking-tight">{formatDZD(o.revenue.amount)}</p>
           <p className="mt-3 text-sm text-secondary">
-            Sur {o.revenue.delivered} commande{o.revenue.delivered === 1 ? "" : "s"} livrée{o.revenue.delivered === 1 ? "" : "s"}
+            Sur {o.revenue.delivered} commande{o.revenue.delivered <= 1 ? "" : "s"} livrée{o.revenue.delivered <= 1 ? "" : "s"}
             {o.revenue.delivered > 0 && <> · panier moyen {formatDZD(o.revenue.average)}</>}
           </p>
           <p className="mt-1 text-xs text-secondary">
@@ -118,7 +119,7 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
         <Link href="/admin/orders?stage=on-the-road" className={tileLink}>
           <p className={label}>En route, en ce moment</p>
           <p className="mt-2 text-2xl font-semibold whitespace-nowrap">{formatDZD(o.onTheRoad.amount)}</p>
-          <p className="mt-3 text-xs text-secondary">{o.onTheRoad.orders} commande{o.onTheRoad.orders === 1 ? "" : "s"} en livraison ou au point relais</p>
+          <p className="mt-3 text-xs text-secondary">{o.onTheRoad.orders} commande{o.onTheRoad.orders <= 1 ? "" : "s"} en livraison ou au point relais</p>
         </Link>
         <div className={card}>
           <p className={label}>Taux de confirmation</p>
@@ -215,7 +216,7 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
                     {s.product} <span className="text-secondary">· {s.variant}</span>
                   </span>
                   <span className={`text-sm font-semibold tabular-nums ${s.available === 0 ? "text-error" : ""}`}>
-                    {s.available === 0 ? "Épuisé" : `${s.available} restant${s.available === 1 ? "" : "s"}`}
+                    {s.available === 0 ? "Épuisé" : `${s.available} restant${s.available <= 1 ? "" : "s"}`}
                   </span>
                 </Link>
               </li>
