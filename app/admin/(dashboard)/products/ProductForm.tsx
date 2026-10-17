@@ -4,10 +4,10 @@ import { useState, useTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, Plus, Trash2, Upload, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Trash2, X } from "lucide-react";
 import { imageUrl } from "@/lib/images";
 import type { CategoryOption, ProductForm as ProductFormData, VariantForm } from "@/lib/admin/products";
-import { createCategoryAction, createUploadAction, deleteProductAction, saveProductAction } from "./actions";
+import { createCategoryAction, deleteProductAction, saveProductAction } from "./actions";
 
 const input =
   "w-full bg-transparent border border-outline-variant px-3 py-2.5 text-sm focus:outline-none focus:border-primary disabled:opacity-60";
@@ -46,11 +46,9 @@ const emptyVariant = (from?: VariantForm): VariantForm => ({
 export default function ProductForm({
   initial,
   categories: initialCategories,
-  storageReady,
 }: {
   initial: ProductFormData;
   categories: CategoryOption[];
-  storageReady: boolean;
 }) {
   const router = useRouter();
   const isNew = !initial.id;
@@ -59,7 +57,7 @@ export default function ProductForm({
   const [detailsText, setDetailsText] = useState(initial.details.join("\n"));
   const [categories, setCategories] = useState(initialCategories);
   const [newCategory, setNewCategory] = useState("");
-  const [uploading, setUploading] = useState<string[]>([]);
+  const [newImage, setNewImage] = useState("");
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -68,23 +66,12 @@ export default function ProductForm({
     setForm((f) => ({ ...f, variants: f.variants.map((v, j) => (j === i ? { ...v, ...patch } : v)) }));
 
   // ---- photos
-  const uploadFiles = async (files: FileList | null) => {
-    if (!files?.length) return;
-    setMessage(null);
-    for (const file of Array.from(files)) {
-      setUploading((u) => [...u, file.name]);
-      try {
-        const signed = await createUploadAction(form.slug || "new", file.type, file.size);
-        if (!signed.ok) throw new Error(signed.error);
-        const res = await fetch(signed.uploadUrl, { method: "PUT", body: file, headers: { "Content-Type": file.type } });
-        if (!res.ok) throw new Error(`Upload failed (${res.status}).`);
-        setForm((f) => ({ ...f, images: [...f.images, signed.key] }));
-      } catch (error) {
-        setMessage({ ok: false, text: `${file.name}: ${error instanceof Error ? error.message : "upload failed."}` });
-      } finally {
-        setUploading((u) => u.filter((n) => n !== file.name));
-      }
-    }
+  // Photos are files in /public (e.g. /products/cam-01.jpg); uploads are off in this demo.
+  const addImage = () => {
+    const path = newImage.trim();
+    if (!path.startsWith("/") || form.images.includes(path)) return;
+    setForm((f) => ({ ...f, images: [...f.images, path] }));
+    setNewImage("");
   };
   const moveImage = (i: number, dir: -1 | 1) =>
     setForm((f) => {
@@ -186,11 +173,6 @@ export default function ProductForm({
       {/* Photos */}
       <section className={section}>
         <h2 className={sectionTitle}>Photos</h2>
-        {!storageReady && (
-          <p className="text-sm text-secondary mb-4">
-            Uploading is off until Cloudflare R2 is connected. Existing photos can still be reordered or removed.
-          </p>
-        )}
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
           {form.images.map((img, i) => {
             const src = imageUrl(img);
@@ -200,7 +182,7 @@ export default function ProductForm({
                   {src ? (
                     <Image src={src} alt="" fill sizes="160px" className="object-cover" />
                   ) : (
-                    <span className="absolute inset-0 flex items-center justify-center text-[10px] text-secondary p-2 text-center">Not viewable until R2 is connected</span>
+                    <span className="absolute inset-0 flex items-center justify-center text-[10px] text-secondary p-2 text-center">Image not found</span>
                   )}
                   {i === 0 && <span className="absolute top-1.5 left-1.5 bg-black/75 text-white text-[10px] px-1.5 py-0.5">Main</span>}
                 </div>
@@ -218,27 +200,18 @@ export default function ProductForm({
               </div>
             );
           })}
-          {uploading.map((name) => (
-            <div key={name} className="aspect-3/4 bg-surface-container animate-pulse flex items-center justify-center text-[10px] text-secondary p-2 text-center">
-              Uploading {name}…
-            </div>
-          ))}
-          {storageReady && (
-            <label className="aspect-3/4 border border-dashed border-outline flex flex-col items-center justify-center gap-1 text-xs text-secondary cursor-pointer hover:border-primary hover:text-primary">
-              <Upload size={18} aria-hidden="true" />
-              Add photos
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/webp,image/avif"
-                multiple
-                className="sr-only"
-                onChange={(e) => {
-                  uploadFiles(e.target.files);
-                  e.target.value = "";
-                }}
-              />
-            </label>
-          )}
+        </div>
+        <div className="flex gap-2 mt-3">
+          <input
+            value={newImage}
+            onChange={(e) => setNewImage(e.target.value)}
+            placeholder="/products/cam-01.jpg"
+            aria-label="Image path"
+            className={input}
+          />
+          <button type="button" onClick={addImage} disabled={!newImage.trim().startsWith("/")} aria-label="Add image" className="p-2.5 border border-outline-variant disabled:opacity-40">
+            <Plus size={16} />
+          </button>
         </div>
         <p className="text-xs text-secondary mt-3">The first photo is the main one in the shop. Use portrait 3:4 photos, at least 1500×2000, up to 15 MB.</p>
       </section>
@@ -382,7 +355,7 @@ export default function ProductForm({
       {/* Save bar */}
       <div className="fixed bottom-0 left-0 right-0 lg:left-60 z-20 bg-surface/95 backdrop-blur border-t border-outline-variant">
         <div className="max-w-5xl px-5 md:px-10 py-3 flex flex-wrap items-center gap-3">
-          <button type="submit" disabled={pending || uploading.length > 0} className="px-6 py-2.5 bg-primary text-on-primary text-xs font-medium tracking-label uppercase disabled:opacity-40">
+          <button type="submit" disabled={pending} className="px-6 py-2.5 bg-primary text-on-primary text-xs font-medium tracking-label uppercase disabled:opacity-40">
             {pending ? "Saving…" : isNew ? "Create product" : "Save changes"}
           </button>
           <Link href="/admin/products" className="text-sm text-secondary hover:text-primary">Cancel</Link>

@@ -2,7 +2,6 @@ import "server-only";
 import { prisma } from "../prisma";
 import { Prisma } from "../generated/prisma/client";
 import { imageUrl } from "../images";
-import { deleteImage } from "../storage";
 import type { ActionResult } from "./orders";
 
 // ---------------------------------------------------------------- types
@@ -45,7 +44,7 @@ export type ProductForm = {
   limited: boolean;
   active: boolean;
   categoryIds: string[];
-  images: string[]; // stored values: "/public/path" or an R2 key; first = main photo
+  images: string[]; // stored values: "/public/path"; first = main photo
   variants: VariantForm[];
 };
 
@@ -324,15 +323,12 @@ export async function saveProduct(idParam: string | null, input: unknown): Promi
         }
       }
 
-      const removedImages = (existing?.images ?? []).map((i) => i.imageUrl).filter((url) => !data.images.includes(url));
       return {
         id: product.id.toString(),
         slugs: [...new Set([data.slug, existing?.slug].filter((s): s is string => !!s))],
-        removedImages,
       };
     });
 
-    for (const key of result.removedImages) await deleteImage(key);
     return { ok: true, id: result.id, slugs: result.slugs };
   } catch (error) {
     if (error instanceof ProductError) return { ok: false, error: error.message };
@@ -361,7 +357,6 @@ export async function deleteProduct(idParam: string): Promise<ActionResult & { a
     return { ok: true, archived: true, slug: product.slug };
   }
   await prisma.product.delete({ where: { id: product.id } });
-  for (const img of product.images) await deleteImage(img.imageUrl);
   return { ok: true, archived: false, slug: product.slug };
 }
 

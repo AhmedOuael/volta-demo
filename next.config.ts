@@ -3,11 +3,6 @@ import { REMOTE_IMAGE_HOSTS } from "./lib/image-hosts";
 
 const isDev = process.env.NODE_ENV === "development";
 
-// Product photo uploads go from the admin's browser straight to Cloudflare R2.
-const r2Endpoint = process.env.R2_ACCOUNT_ID
-  ? `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`
-  : "https://*.r2.cloudflarestorage.com";
-
 // CSP without nonces (per the Next.js guide): nonces would force every page to
 // render per request and lose the pre-built, cached product pages. Next.js and
 // React still need inline scripts/styles, so the protection here comes from
@@ -18,7 +13,7 @@ const csp = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' blob: data:", // remote photos are served through /_next/image
   "font-src 'self'",
-  `connect-src 'self' ${r2Endpoint}`,
+  "connect-src 'self'",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",

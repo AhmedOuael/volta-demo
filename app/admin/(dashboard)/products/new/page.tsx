@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/auth/session";
 import { listCategories } from "@/lib/admin/products";
-import { isStorageConfigured } from "@/lib/storage";
 import ProductForm from "../ProductForm";
 
 export default async function NewProductPage() {
@@ -16,7 +15,6 @@ export default async function NewProductPage() {
       <h1 className="font-display text-3xl mt-3 mb-8">New product</h1>
       <ProductForm
         categories={categories}
-        storageReady={isStorageConfigured()}
         initial={{
           name: "",
           slug: "",

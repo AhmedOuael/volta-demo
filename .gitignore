@@ -136,3 +136,4 @@ NOIR-AUDIT-REPORT.md
 
 # agent workspaces
 .superpowers/
+!.env.example

@@ -2,7 +2,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth/session";
 import { getProductForm, listCategories } from "@/lib/admin/products";
-import { isStorageConfigured } from "@/lib/storage";
 import ProductForm from "../ProductForm";
 
 export default async function EditProductPage({
@@ -36,7 +35,7 @@ export default async function EditProductPage({
           This product has orders, so it was hidden from the shop instead of deleted. Its order history is kept.
         </p>
       )}
-      <ProductForm key={product.id} initial={product} categories={categories} storageReady={isStorageConfigured()} />
+      <ProductForm key={product.id} initial={product} categories={categories} />
     </div>
   );
 }
