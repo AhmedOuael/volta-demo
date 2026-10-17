@@ -3,3 +3,7 @@
 
 [build.environment]
   NODE_VERSION = "24"
+
+# Uploaded (non-Git) deploys don't auto-install the Next.js runtime, so it's declared here.
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
