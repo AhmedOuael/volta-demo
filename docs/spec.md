@@ -185,5 +185,5 @@ One file per brand in `brands/<slug>.ts`, registered in `brands/index.ts`. Typed
 
 ## 13. Open items
 
-1. Netlify free-plan terms for commercial demos (see §12).
+1. ~~Netlify free-plan terms~~ Resolved 2026-10-17: Netlify Terms of Use set no personal-use limit (https://netlify.com/legal/terms-of-use) and Netlify staff confirm commercial use on the free plan (https://answers.netlify.com/t/can-we-use-netlify-free-plan-for-commercial-purposes/41545/2).
 2. Volta Studio's accent colour and fonts, and Advanced Media's exact colours (shown as a quick visual choice at the start of the build).
