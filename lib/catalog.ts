@@ -33,20 +33,13 @@ export type CatalogProduct = {
   variants: CatalogVariant[];
 };
 
-const SIZE_ORDER = ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"];
-
 const productInclude = {
   categories: { include: { category: true } },
   images: { orderBy: [{ isPrimary: "desc" }, { displayOrder: "asc" }] },
-  variants: { where: { active: true } },
+  variants: { where: { active: true }, orderBy: [{ price: "asc" }, { id: "asc" }] }, // cheapest version first, then seed order
 } satisfies Prisma.ProductInclude;
 
 type ProductRow = Prisma.ProductGetPayload<{ include: typeof productInclude }>;
-
-function sizeRank(size: string | null) {
-  const i = size ? SIZE_ORDER.indexOf(size.toUpperCase()) : -1;
-  return i === -1 ? SIZE_ORDER.length : i;
-}
 
 function toCatalogProduct(p: ProductRow): CatalogProduct {
   const variants = p.variants
@@ -57,8 +50,7 @@ function toCatalogProduct(p: ProductRow): CatalogProduct {
       color: v.color,
       price: v.price.toNumber(),
       available: Math.max(0, v.physicalStock - v.reservedStock),
-    }))
-    .sort((a, b) => sizeRank(a.size) - sizeRank(b.size));
+    }));
   const images = p.images.map((img) => imageUrl(img.imageUrl)).filter((url): url is string => url !== null);
   const categories = p.categories
     .filter((pc) => pc.category.active)
