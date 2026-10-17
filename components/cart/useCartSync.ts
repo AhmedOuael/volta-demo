@@ -40,7 +40,7 @@ export function useCartSync(enabled = true) {
           }
           return next;
         });
-        if (changed) setNotice("Some items in your bag changed price or availability. Please review before ordering.");
+        if (changed) setNotice("Le prix ou la disponibilité de certains articles a changé. Vérifiez votre panier avant de commander.");
       })
       .catch(() => {
         // Offline / server error: keep the local cart; the order is re-validated anyway.

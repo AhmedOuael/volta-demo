@@ -25,7 +25,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
         ← All orders
       </Link>
       <div className="flex flex-wrap items-center gap-3 mt-3 mb-8">
-        <h1 className="font-display text-3xl">Order #{order.id}</h1>
+        <h1 className="font-display text-3xl">Commande n° {order.id}</h1>
         <StatusBadge status={order.status} />
         <span className="text-sm text-secondary">{formatDateTime(order.createdAt)}</span>
       </div>
@@ -34,21 +34,21 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
         <div className="space-y-6">
           {/* Customer */}
           <section className={card}>
-            <h2 className={cardTitle}>Customer</h2>
+            <h2 className={cardTitle}>Client</h2>
             <Link href={`/admin/clients/${order.customer.id}`} className="text-lg hover:underline underline-offset-4">{order.customer.name}</Link>
             <a href={`tel:${order.customer.phone}`} className="inline-block mt-1 text-lg font-semibold underline underline-offset-4">
               {formatPhone(order.customer.phone)}
             </a>
             <p className={`text-xs mt-3 ${order.history.refusedOrReturned > 0 ? "text-error font-medium" : "text-secondary"}`}>
               {previous === 0
-                ? "First order from this number."
-                : `${previous} other order${previous > 1 ? "s" : ""} from this number: ${order.history.delivered} delivered, ${order.history.refusedOrReturned} refused/returned, ${order.history.canceled} canceled.`}
+                ? "Première commande avec ce numéro."
+                : `${previous} autre${previous > 1 ? "s" : ""} commande${previous > 1 ? "s" : ""} avec ce numéro : ${order.history.delivered} livrée(s), ${order.history.refusedOrReturned} refusée(s)/retournée(s), ${order.history.canceled} annulée(s).`}
             </p>
           </section>
 
           {/* Items */}
           <section className={card}>
-            <h2 className={cardTitle}>Items</h2>
+            <h2 className={cardTitle}>Articles</h2>
             <table className="w-full text-sm">
               <tbody>
                 {order.items.map((item) => (
@@ -67,21 +67,21 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
             </table>
             <div className="mt-4 pt-4 border-t border-outline-variant space-y-1 text-sm">
               <div className="flex justify-between">
-                <span className="text-secondary">Subtotal</span>
+                <span className="text-secondary">Sous-total</span>
                 <span>{formatDZD(order.subtotal)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-secondary">Delivery ({order.deliveryType === "HOME" ? "home" : "stop-desk"})</span>
+                <span className="text-secondary">Livraison ({order.deliveryType === "HOME" ? "domicile" : "bureau"})</span>
                 <span>{formatDZD(order.deliveryFee)}</span>
               </div>
               {order.discount > 0 && (
                 <div className="flex justify-between">
-                  <span className="text-secondary">Discount</span>
+                  <span className="text-secondary">Remise</span>
                   <span>−{formatDZD(order.discount)}</span>
                 </div>
               )}
               <div className="flex justify-between font-semibold text-base pt-2">
-                <span>Total to collect</span>
+                <span>Total à encaisser</span>
                 <span>{formatDZD(order.total)}</span>
               </div>
             </div>
@@ -89,7 +89,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
 
           {/* Timeline */}
           <section className={card}>
-            <h2 className={cardTitle}>History</h2>
+            <h2 className={cardTitle}>Historique</h2>
             <ol className="space-y-2 text-sm">
               {order.timeline.map((t, i) => (
                 <li key={i} className="flex flex-wrap gap-x-3">
@@ -104,12 +104,12 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
 
         <div className="space-y-6">
           <section className={card}>
-            <h2 className={cardTitle}>Update status</h2>
+            <h2 className={cardTitle}>Changer le statut</h2>
             <StatusActions orderId={order.id} status={order.status} />
           </section>
 
           <section className={card}>
-            <h2 className={cardTitle}>Delivery details</h2>
+            <h2 className={cardTitle}>Livraison</h2>
             <DeliveryDetailsForm
               key={`${order.status}-${order.communeId}-${order.address}-${order.deliveryFee}-${order.deliveryType}`}
               orderId={order.id}

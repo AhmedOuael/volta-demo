@@ -22,7 +22,7 @@ export default function ProductCard({ product }: { product: CatalogProduct }) {
         )}
         {product.limited && (
           <span className="absolute top-3 left-3 bg-primary text-on-primary text-[10px] tracking-label uppercase px-2 py-1">
-            Limited
+            Édition limitée
           </span>
         )}
       </div>

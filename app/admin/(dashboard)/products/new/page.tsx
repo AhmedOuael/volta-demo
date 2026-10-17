@@ -10,9 +10,9 @@ export default async function NewProductPage() {
   return (
     <div>
       <Link href="/admin/products" className="text-xs tracking-label uppercase text-secondary hover:text-primary">
-        ← All products
+        ← Tous les produits
       </Link>
-      <h1 className="font-display text-3xl mt-3 mb-8">New product</h1>
+      <h1 className="font-display text-3xl mt-3 mb-8">Nouveau produit</h1>
       <ProductForm
         categories={categories}
         initial={{
@@ -24,7 +24,7 @@ export default async function NewProductPage() {
           active: true,
           categoryIds: [],
           images: [],
-          variants: ["S", "M", "L", "XL"].map((size) => ({ size, color: "", sku: "", price: "", physicalStock: 0, active: true })),
+          variants: ["Standard"].map((size) => ({ size, color: "", sku: "", price: "", physicalStock: 0, active: true })),
         }}
       />
     </div>

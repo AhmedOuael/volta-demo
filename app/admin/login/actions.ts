@@ -10,7 +10,7 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
   const email = formData.get("email");
   const password = formData.get("password");
   if (typeof email !== "string" || typeof password !== "string" || !email || !password) {
-    return { error: "Enter your email and password." };
+    return { error: "Entrez votre e-mail et votre mot de passe." };
   }
 
   const result = await login(email, password);

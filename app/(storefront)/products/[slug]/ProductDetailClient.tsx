@@ -20,7 +20,7 @@ export default function ProductDetailClient({ product }: { product: CatalogProdu
   const selected = product.variants.find((v) => v.id === selectedId) ?? null;
   const multiColor = new Set(product.variants.map((v) => v.color)).size > 1;
   const variantLabel = (v: CatalogVariant) =>
-    multiColor ? [v.color, v.size].filter(Boolean).join(" / ") : v.size ?? v.color ?? "One size";
+    multiColor ? [v.color, v.size].filter(Boolean).join(" / ") : v.size ?? v.color ?? "Version unique";
 
   const handleAddToBag = () => {
     if (!selected) return;
@@ -65,8 +65,7 @@ export default function ProductDetailClient({ product }: { product: CatalogProdu
 
           {/* Size selector */}
           <div className="mb-4 flex items-center justify-between">
-            <span className="text-xs font-medium tracking-label uppercase">Select Size</span>
-            <button className="text-xs text-secondary underline">Size Guide</button>
+            <span className="text-xs font-medium tracking-label uppercase">Choisir une version</span>
           </div>
           <div className="flex flex-wrap gap-3 mb-8">
             {product.variants.map((v) => (
@@ -90,23 +89,23 @@ export default function ProductDetailClient({ product }: { product: CatalogProdu
               disabled={!selected}
               className="w-full bg-primary text-on-primary py-4 rounded-full text-sm font-medium tracking-label uppercase hover:opacity-90 transition-opacity disabled:opacity-40"
             >
-              {selected ? "Buy Now" : "Select a Size"}
+              {selected ? "Acheter maintenant" : "Choisissez une version"}
             </button>
             <button
               onClick={handleAddToBag}
               disabled={!selected}
               className="w-full border border-primary py-4 rounded-full text-sm font-medium tracking-label uppercase hover:bg-surface-container transition-colors disabled:opacity-40 disabled:hover:bg-transparent"
             >
-              {added ? "Added to Bag ✓" : "Add to Bag"}
+              {added ? "Ajouté au panier ✓" : "Ajouter au panier"}
             </button>
           </div>
 
           {/* Accordions */}
           <div className="border-t border-outline-variant">
             {[
-              { id: "details", title: "Details & Care", body: product.details.join(" · ") },
-              { id: "shipping", title: "Yalidine Shipping", body: "Delivered nationwide via Yalidine, home or relay-point delivery to all 58 wilayas. Cash on delivery available." },
-              { id: "returns", title: "Returns & Exchanges", body: "Free exchanges within 14 days of delivery for unworn items in original packaging." },
+              { id: "details", title: "Caractéristiques", body: product.details.join(" · ") },
+              { id: "shipping", title: "Livraison", body: "Livraison partout en Algérie, à domicile ou au bureau de livraison. Paiement à la livraison." },
+              { id: "returns", title: "Retours et garantie", body: "Conditions de retour et de garantie précisées lors de l'appel de confirmation." },
             ].map((section) => (
               <div key={section.id} className="border-b border-outline-variant">
                 <button

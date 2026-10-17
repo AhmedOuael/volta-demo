@@ -5,7 +5,7 @@ import { createSession } from "./session";
 
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCK_MINUTES = 15;
-const GENERIC_ERROR = "Wrong email or password.";
+const GENERIC_ERROR = "E-mail ou mot de passe incorrect.";
 
 export type LoginResult = { ok: true } | { ok: false; error: string };
 

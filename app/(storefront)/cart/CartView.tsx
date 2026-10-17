@@ -30,7 +30,7 @@ export function CartLine({ item, editable }: { item: CartItem; editable: boolean
             <p className="text-secondary text-xs tracking-label uppercase mt-1">{variantLabel(item)}</p>
           </div>
           {editable && (
-            <button onClick={() => removeItem(item.variantId)} aria-label={`Remove ${item.name}`} className="text-secondary hover:text-primary h-fit">
+            <button onClick={() => removeItem(item.variantId)} aria-label={`Retirer ${item.name}`} className="text-secondary hover:text-primary h-fit">
               <X size={18} />
             </button>
           )}
@@ -40,7 +40,7 @@ export function CartLine({ item, editable }: { item: CartItem; editable: boolean
             <div className="flex items-center border border-outline-variant">
               <button
                 onClick={() => setQuantity(item.variantId, item.quantity - 1)}
-                aria-label="Decrease quantity"
+                aria-label="Diminuer la quantité"
                 className="w-9 h-9 flex items-center justify-center hover:bg-surface-container"
               >
                 <Minus size={14} />
@@ -49,7 +49,7 @@ export function CartLine({ item, editable }: { item: CartItem; editable: boolean
               <button
                 onClick={() => setQuantity(item.variantId, item.quantity + 1)}
                 disabled={item.quantity >= max}
-                aria-label="Increase quantity"
+                aria-label="Augmenter la quantité"
                 className="w-9 h-9 flex items-center justify-center hover:bg-surface-container disabled:opacity-30"
               >
                 <Plus size={14} />
@@ -71,17 +71,17 @@ export default function CartView() {
   const { items, subtotal, hydrated } = useCart();
   const { syncing, notice } = useCartSync();
 
-  if (!hydrated) return <p className="text-secondary py-24 text-center">Loading your bag…</p>;
+  if (!hydrated) return <p className="text-secondary py-24 text-center">Chargement du panier…</p>;
 
   if (items.length === 0) {
     return (
       <div className="text-center py-24">
-        <p className="text-secondary mb-8">Your bag is empty.</p>
+        <p className="text-secondary mb-8">Votre panier est vide.</p>
         <Link
           href="/products"
           className="inline-block bg-primary text-on-primary px-10 py-4 rounded-full text-sm font-medium tracking-label uppercase hover:opacity-90 transition-opacity"
         >
-          Explore Collection
+          Voir la boutique
         </Link>
       </div>
     );
@@ -99,14 +99,14 @@ export default function CartView() {
       </div>
 
       <aside className="lg:sticky lg:top-28 h-fit bg-surface-container-low p-6 md:p-8">
-        <h2 className="text-xs font-medium tracking-label uppercase mb-6">Summary</h2>
+        <h2 className="text-xs font-medium tracking-label uppercase mb-6">Récapitulatif</h2>
         <div className="flex justify-between text-sm mb-3">
-          <span className="text-secondary">Subtotal</span>
+          <span className="text-secondary">Sous-total</span>
           <span className="font-semibold">{formatDZD(subtotal)}</span>
         </div>
         <div className="flex justify-between text-sm mb-8">
-          <span className="text-secondary">Delivery</span>
-          <span className="text-secondary">Calculated at checkout</span>
+          <span className="text-secondary">Livraison</span>
+          <span className="text-secondary">Calculée à la commande</span>
         </div>
         <Link
           href="/checkout"
@@ -116,9 +116,9 @@ export default function CartView() {
           }}
           className={`block text-center w-full bg-primary text-on-primary py-4 rounded-full text-sm font-medium tracking-label uppercase hover:opacity-90 transition-opacity ${syncing ? "pointer-events-none opacity-40" : ""}`}
         >
-          Checkout
+          Commander
         </Link>
-        <p className="text-xs text-secondary text-center mt-4">Cash on delivery · Pay when you receive your order</p>
+        <p className="text-xs text-secondary text-center mt-4">Paiement à la livraison · Vous payez à la réception</p>
       </aside>
     </div>
   );

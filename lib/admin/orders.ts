@@ -21,7 +21,7 @@ export type ActionResult = { ok: true } | { ok: false; error: string };
 
 class OrderActionError extends Error {}
 
-const CONFLICT = "This order was just updated by someone else. Refresh the page and try again.";
+const CONFLICT = "Cette commande vient d'être modifiée par quelqu'un d'autre. Actualisez la page et réessayez.";
 
 // ---------------------------------------------------------------- list
 
@@ -203,30 +203,30 @@ export async function updateOrderDetails(
   orderIdParam: string,
   input: { deliveryType: unknown; communeId: unknown; address: unknown; deliveryFee: unknown }
 ): Promise<ActionResult> {
-  if (!/^\d{1,18}$/.test(orderIdParam)) return { ok: false, error: "Order not found." };
+  if (!/^\d{1,18}$/.test(orderIdParam)) return { ok: false, error: "Commande introuvable." };
   const order = await prisma.order.findUnique({ where: { id: BigInt(orderIdParam) } });
-  if (!order) return { ok: false, error: "Order not found." };
+  if (!order) return { ok: false, error: "Commande introuvable." };
   if (!DETAILS_EDITABLE.includes(order.status as OrderStatus)) {
-    return { ok: false, error: "Delivery details can't be changed once the order is being prepared." };
+    return { ok: false, error: "Les informations de livraison ne peuvent plus être modifiées une fois la commande en préparation." };
   }
 
-  if (!isDeliveryType(input.deliveryType)) return { ok: false, error: "Choose home or stop-desk delivery." };
+  if (!isDeliveryType(input.deliveryType)) return { ok: false, error: "Choisissez la livraison à domicile ou au bureau de livraison." };
 
   let communeId: bigint | null = null;
   if (typeof input.communeId === "string" && input.communeId !== "") {
-    if (!/^\d{1,18}$/.test(input.communeId)) return { ok: false, error: "Invalid commune." };
+    if (!/^\d{1,18}$/.test(input.communeId)) return { ok: false, error: "Commune invalide." };
     const commune = await prisma.commune.findFirst({
       where: { id: BigInt(input.communeId), wilayaId: order.wilayaId, active: true },
     });
-    if (!commune) return { ok: false, error: "That commune isn't in the order's wilaya." };
+    if (!commune) return { ok: false, error: "Cette commune n'appartient pas à la wilaya de la commande." };
     communeId = commune.id;
   }
 
   const address = typeof input.address === "string" ? input.address.trim().replace(/\s+/g, " ") : "";
-  if (address.length > 300) return { ok: false, error: "Address is too long." };
+  if (address.length > 300) return { ok: false, error: "Adresse trop longue." };
 
   const feeText = typeof input.deliveryFee === "string" ? input.deliveryFee.trim() : "";
-  if (!/^\d{1,6}(\.\d{1,2})?$/.test(feeText)) return { ok: false, error: "Enter a valid delivery fee." };
+  if (!/^\d{1,6}(\.\d{1,2})?$/.test(feeText)) return { ok: false, error: "Entrez des frais de livraison valides." };
   const deliveryFee = new Prisma.Decimal(feeText);
 
   if (order.status === "CONFIRMED") {
@@ -256,9 +256,9 @@ async function missingForConfirmation(order: {
 }): Promise<string | null> {
   if (!order.communeId) {
     const hasCommunes = await prisma.commune.count({ where: { wilayaId: order.wilayaId, active: true } });
-    if (hasCommunes > 0) return "Choose the customer's commune before confirming.";
+    if (hasCommunes > 0) return "Choisissez la commune du client avant de confirmer.";
   }
-  if (order.deliveryType === "HOME" && !order.address) return "Enter the delivery address before confirming.";
+  if (order.deliveryType === "HOME" && !order.address) return "Entrez l'adresse de livraison avant de confirmer.";
   return null;
 }
 
@@ -271,12 +271,12 @@ export async function changeOrderStatus(
   user: SessionUser
 ): Promise<ActionResult & { slugs?: string[] }> {
   if (!/^\d{1,18}$/.test(orderIdParam) || !isOrderStatus(fromParam) || !isOrderStatus(toParam)) {
-    return { ok: false, error: "Invalid request." };
+    return { ok: false, error: "Requête invalide." };
   }
   const orderId = BigInt(orderIdParam);
   const from = fromParam;
   const to = toParam;
-  if (!STATUS_TRANSITIONS[from].includes(to)) return { ok: false, error: "That status change isn't allowed." };
+  if (!STATUS_TRANSITIONS[from].includes(to)) return { ok: false, error: "Ce changement de statut n'est pas autorisé." };
 
   try {
     const slugs = await prisma.$transaction(async (tx) => {
@@ -284,7 +284,7 @@ export async function changeOrderStatus(
         where: { id: orderId },
         include: { items: { include: { variant: { select: { product: { select: { slug: true } } } } } } },
       });
-      if (!order) throw new OrderActionError("Order not found.");
+      if (!order) throw new OrderActionError("Commande introuvable.");
       if (order.status !== from) throw new OrderActionError(CONFLICT);
 
       if (to === "CONFIRMED") {

@@ -12,11 +12,11 @@ export default function LoginForm() {
   return (
     <form action={action} className="space-y-5">
       <label className="block">
-        <span className="text-sm mb-2 block">Email</span>
+        <span className="text-sm mb-2 block">E-mail</span>
         <input name="email" type="email" autoComplete="username" required className={inputClass} />
       </label>
       <label className="block">
-        <span className="text-sm mb-2 block">Password</span>
+        <span className="text-sm mb-2 block">Mot de passe</span>
         <input name="password" type="password" autoComplete="current-password" required className={inputClass} />
       </label>
       {state.error && <p className="text-error text-sm">{state.error}</p>}
@@ -25,7 +25,7 @@ export default function LoginForm() {
         disabled={pending}
         className="w-full bg-primary text-on-primary py-4 rounded-full text-sm font-medium tracking-label uppercase hover:opacity-90 transition-opacity disabled:opacity-40"
       >
-        {pending ? "Signing in…" : "Sign in"}
+        {pending ? "Connexion…" : "Se connecter"}
       </button>
     </form>
   );

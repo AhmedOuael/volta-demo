@@ -37,7 +37,7 @@ export default function DeliveryDetailsForm(props: Props) {
     setMessage(null);
     startSaving(async () => {
       const result = await saveOrderDetails(props.orderId, { deliveryType, communeId, address, deliveryFee: fee });
-      setMessage(result.ok ? { ok: true, text: "Saved." } : { ok: false, text: result.error });
+      setMessage(result.ok ? { ok: true, text: "Enregistré." } : { ok: false, text: result.error });
     });
   };
 
@@ -51,10 +51,10 @@ export default function DeliveryDetailsForm(props: Props) {
       </div>
 
       <label className="block">
-        <span className="text-xs text-secondary block mb-1">Delivery type</span>
+        <span className="text-xs text-secondary block mb-1">Type de livraison</span>
         <select value={deliveryType} onChange={(e) => setDeliveryType(e.target.value as Props["deliveryType"])} disabled={disabled} className={inputClass}>
-          <option value="HOME">Home delivery</option>
-          <option value="STOP_DESK">Stop-desk</option>
+          <option value="HOME">Livraison à domicile</option>
+          <option value="STOP_DESK">Bureau de livraison</option>
         </select>
       </label>
 
@@ -62,7 +62,7 @@ export default function DeliveryDetailsForm(props: Props) {
         <span className="text-xs text-secondary block mb-1">Commune</span>
         {props.communes.length > 0 ? (
           <select value={communeId} onChange={(e) => setCommuneId(e.target.value)} disabled={disabled} className={inputClass}>
-            <option value="">— Ask the customer —</option>
+            <option value="">— À demander au client —</option>
             {props.communes.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
@@ -70,13 +70,13 @@ export default function DeliveryDetailsForm(props: Props) {
             ))}
           </select>
         ) : (
-          <p className="text-xs text-secondary">No commune list for this wilaya yet: confirm with the wilaya{deliveryType === "HOME" ? " and address" : ""} only.</p>
+          <p className="text-xs text-secondary">Pas encore de liste de communes pour cette wilaya : confirmez avec la wilaya{deliveryType === "HOME" ? " et l'adresse" : ""} uniquement.</p>
         )}
       </label>
 
       <label className="block">
         <span className="text-xs text-secondary block mb-1">
-          Address {deliveryType === "HOME" ? "(required for home delivery)" : "(optional)"}
+          Adresse {deliveryType === "HOME" ? "(obligatoire pour la livraison à domicile)" : "(facultative)"}
         </span>
         <textarea
           value={address}
@@ -84,13 +84,13 @@ export default function DeliveryDetailsForm(props: Props) {
           disabled={disabled}
           rows={2}
           maxLength={300}
-          placeholder="Street, building, landmark…"
+          placeholder="Rue, immeuble, point de repère…"
           className={inputClass}
         />
       </label>
 
       <label className="block">
-        <span className="text-xs text-secondary block mb-1">Delivery fee (DZD)</span>
+        <span className="text-xs text-secondary block mb-1">Frais de livraison (DA)</span>
         <input value={fee} onChange={(e) => setFee(e.target.value)} disabled={disabled} inputMode="decimal" className={inputClass} />
       </label>
 
@@ -101,13 +101,13 @@ export default function DeliveryDetailsForm(props: Props) {
             disabled={saving || !dirty}
             className="px-5 py-2.5 bg-primary text-on-primary text-xs font-medium tracking-label uppercase disabled:opacity-40"
           >
-            {saving ? "Saving…" : "Save details"}
+            {saving ? "Enregistrement…" : "Enregistrer"}
           </button>
-          {dirty && !saving && <span className="text-xs text-secondary">Unsaved changes</span>}
+          {dirty && !saving && <span className="text-xs text-secondary">Modifications non enregistrées</span>}
           {message && <span className={`text-xs ${message.ok ? "text-accent" : "text-error"}`}>{message.text}</span>}
         </div>
       ) : (
-        <p className="text-xs text-secondary">Locked: the order is past confirmation.</p>
+        <p className="text-xs text-secondary">Verrouillé : la commande a dépassé l'étape de confirmation.</p>
       )}
     </form>
   );

@@ -33,13 +33,14 @@ export default function ProductGrid({
           <button
             key={cat}
             onClick={() => setActive(cat)}
+            aria-pressed={active === cat}
             className={`px-5 py-2 rounded-full text-xs font-medium tracking-label uppercase border transition-colors whitespace-nowrap ${
               active === cat
                 ? "border-primary bg-primary text-on-primary"
                 : "border-outline-variant text-secondary hover:border-primary hover:text-primary"
             }`}
           >
-            {cat}
+            {cat === "All" ? "Tout" : cat}
           </button>
         ))}
       </div>
@@ -61,7 +62,7 @@ export default function ProductGrid({
       </div>
 
       {filtered.length === 0 && (
-        <p className="text-center text-secondary py-24">No products in this category yet</p>
+        <p className="text-center text-secondary py-24">Aucun produit dans cette catégorie pour le moment</p>
       )}
     </>
   );

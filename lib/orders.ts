@@ -37,25 +37,25 @@ const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === "obj
  * so everything is validated here and prices/fees are recomputed server-side.
  */
 export async function createOrder(input: unknown): Promise<PlaceOrderResult> {
-  if (!isRecord(input)) return { ok: false, error: "Invalid request." };
+  if (!isRecord(input)) return { ok: false, error: "Requête invalide." };
 
   // Honeypot: a hidden field real customers never fill in.
   if (typeof input.website === "string" && input.website.trim() !== "") {
-    return { ok: false, error: "We couldn't place your order. Please try again." };
+    return { ok: false, error: "Nous n'avons pas pu enregistrer votre commande. Réessayez." };
   }
 
   const fullName = typeof input.fullName === "string" ? input.fullName.trim().replace(/\s+/g, " ") : "";
   if (fullName.length < 3 || fullName.length > 80) {
-    return { ok: false, field: "fullName", error: "Please enter your full name." };
+    return { ok: false, field: "fullName", error: "Entrez votre nom complet." };
   }
 
   const phone = typeof input.phone === "string" ? normalizePhone(input.phone) : null;
   if (!phone) {
-    return { ok: false, field: "phone", error: "Please enter a valid mobile number (05, 06 or 07…)." };
+    return { ok: false, field: "phone", error: "Entrez un numéro de mobile valide (05, 06 ou 07…)." };
   }
 
   if (!isDeliveryType(input.deliveryType)) {
-    return { ok: false, field: "deliveryType", error: "Please choose home or stop-desk delivery." };
+    return { ok: false, field: "deliveryType", error: "Choisissez la livraison à domicile ou au bureau de livraison." };
   }
   const deliveryType = input.deliveryType;
 
@@ -63,11 +63,11 @@ export async function createOrder(input: unknown): Promise<PlaceOrderResult> {
     typeof input.wilayaId === "string" && /^\d+$/.test(input.wilayaId)
       ? await prisma.wilaya.findFirst({ where: { id: BigInt(input.wilayaId), active: true } })
       : null;
-  if (!wilaya) return { ok: false, field: "wilaya", error: "Please choose your wilaya." };
+  if (!wilaya) return { ok: false, field: "wilaya", error: "Choisissez votre wilaya." };
 
   // Items: merge duplicate lines, validate quantities.
   if (!Array.isArray(input.items) || input.items.length === 0 || input.items.length > MAX_LINES) {
-    return { ok: false, field: "items", error: "Your bag is empty." };
+    return { ok: false, field: "items", error: "Votre panier est vide." };
   }
   const quantities = new Map<string, number>();
   for (const item of input.items) {
@@ -78,20 +78,20 @@ export async function createOrder(input: unknown): Promise<PlaceOrderResult> {
       !Number.isInteger(item.quantity) ||
       (item.quantity as number) < 1
     ) {
-      return { ok: false, field: "items", error: "Your bag contains an invalid item." };
+      return { ok: false, field: "items", error: "Votre panier contient un article invalide." };
     }
     quantities.set(item.variantId, (quantities.get(item.variantId) ?? 0) + (item.quantity as number));
   }
   for (const qty of quantities.values()) {
     if (qty > MAX_QTY_PER_ITEM) {
-      return { ok: false, field: "items", error: `You can order at most ${MAX_QTY_PER_ITEM} of each item.` };
+      return { ok: false, field: "items", error: `Vous pouvez commander au maximum ${MAX_QTY_PER_ITEM} exemplaires de chaque article.` };
     }
   }
 
   // Fee comes from the delivery provider, outside the DB transaction.
   const fee = await getDeliveryFee(wilaya.code, deliveryType);
   if (fee === null) {
-    return { ok: false, field: "deliveryType", error: "This delivery option isn't available for your wilaya." };
+    return { ok: false, field: "deliveryType", error: "Ce mode de livraison n'est pas disponible pour votre wilaya." };
   }
 
   // Lock rows in a consistent order so concurrent checkouts can't deadlock.
@@ -112,7 +112,7 @@ export async function createOrder(input: unknown): Promise<PlaceOrderResult> {
         },
       });
       if (openOrders >= MAX_OPEN_ORDERS_PER_PHONE_PER_HOUR) {
-        throw new OrderError("You already have orders waiting for confirmation. Our team will call you shortly.", null);
+        throw new OrderError("Vous avez déjà des commandes en attente de confirmation. Nous vous appellerons très bientôt.", null);
       }
 
       const variants = await tx.productVariant.findMany({
@@ -124,7 +124,7 @@ export async function createOrder(input: unknown): Promise<PlaceOrderResult> {
       let subtotal = new Prisma.Decimal(0);
       for (const line of lines) {
         const variant = byId.get(line.variantId);
-        if (!variant) throw new OrderError("Some items in your bag are no longer available. Please review your bag.");
+        if (!variant) throw new OrderError("Certains articles de votre panier ne sont plus disponibles. Vérifiez votre panier.");
 
         // Atomic check-and-reserve: only succeeds if enough unreserved stock remains.
         const reserved = await tx.$executeRaw`
@@ -133,7 +133,7 @@ export async function createOrder(input: unknown): Promise<PlaceOrderResult> {
           WHERE "id" = ${line.variantId} AND "physicalStock" - "reservedStock" >= ${line.quantity}`;
         if (reserved !== 1) {
           const label = [variant.product.name, variant.size].filter(Boolean).join(" – ");
-          throw new OrderError(`Not enough stock left for ${label}. Please update your bag.`);
+          throw new OrderError(`Stock insuffisant pour ${label}. Mettez à jour votre panier.`);
         }
         subtotal = subtotal.add(variant.price.mul(line.quantity));
       }

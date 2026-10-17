@@ -10,7 +10,7 @@ type Filters = { status?: string; stage?: string; from?: string; to?: string; q?
 
 const DATE = /^d{4}-d{2}-d{2}$/;
 const formatDay = (d: string) =>
-  new Date(`${d}T12:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+  new Date(`${d}T12:00:00Z`).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
 
 function href(params: Filters) {
   const sp = new URLSearchParams();
@@ -36,7 +36,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Searc
   const dates = { from, to };
 
   const { rows, total, pageCount, counts } = await listOrders({ status, stage, from, to, q, page });
-  const dateLabel = from && to && from === to ? formatDay(from) : from && to ? `${formatDay(from)} – ${formatDay(to)}` : from ? `Since ${formatDay(from)}` : to ? `Until ${formatDay(to)}` : null;
+  const dateLabel = from && to && from === to ? formatDay(from) : from && to ? `${formatDay(from)} – ${formatDay(to)}` : from ? `Depuis le ${formatDay(from)}` : to ? `Jusqu'au ${formatDay(to)}` : null;
   const allCount = Object.values(counts).reduce((a, b) => a + b, 0);
 
   const chip = (active: boolean) =>
@@ -47,7 +47,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Searc
   return (
     <div>
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
-        <h1 className="font-display text-3xl">Orders</h1>
+        <h1 className="font-display text-3xl">Commandes</h1>
         <form action="/admin/orders" className="flex gap-2 w-full md:w-auto">
           {status && <input type="hidden" name="status" value={status} />}
           {stage && <input type="hidden" name="stage" value={stage} />}
@@ -56,19 +56,19 @@ export default async function OrdersPage({ searchParams }: { searchParams: Searc
           <input
             name="q"
             defaultValue={q}
-            placeholder="Order #, phone or name"
+            placeholder="N° de commande, téléphone ou nom"
             className="flex-1 md:w-72 bg-transparent border border-outline-variant px-3 py-2 text-sm focus:outline-none focus:border-primary"
           />
-          <button className="px-4 py-2 bg-primary text-on-primary text-xs font-medium tracking-label uppercase">Search</button>
+          <button className="px-4 py-2 bg-primary text-on-primary text-xs font-medium tracking-label uppercase">Rechercher</button>
         </form>
       </div>
 
       {(stage || dateLabel) && (
         <div className="flex flex-wrap items-center gap-2 mb-4 text-sm">
-          <span className="text-secondary">Showing</span>
+          <span className="text-secondary">Affichage :</span>
           {stage && <span className="px-2.5 py-1 rounded-full bg-surface-container-high">{ORDER_STAGES[stage].label}</span>}
-          {dateLabel && <span className="px-2.5 py-1 rounded-full bg-surface-container-high">Placed {dateLabel}</span>}
-          <Link href={href({ q })} className="underline underline-offset-4 text-secondary hover:text-primary">Clear filters</Link>
+          {dateLabel && <span className="px-2.5 py-1 rounded-full bg-surface-container-high">Passées {dateLabel}</span>}
+          <Link href={href({ q })} className="underline underline-offset-4 text-secondary hover:text-primary">Effacer les filtres</Link>
         </div>
       )}
 
@@ -85,7 +85,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Searc
       </div>
 
       {rows.length === 0 ? (
-        <p className="text-secondary py-24 text-center">No orders{q ? ` matching "${q}"` : ""}.</p>
+        <p className="text-secondary py-24 text-center">Aucune commande{q ? ` pour « ${q} »` : ""}.</p>
       ) : (
         <>
           {/* Desktop table */}
@@ -93,13 +93,13 @@ export default async function OrdersPage({ searchParams }: { searchParams: Searc
             <table className="w-full text-sm">
               <thead className="bg-surface-container-low text-left text-[11px] tracking-label uppercase text-secondary">
                 <tr>
-                  <th className="px-4 py-3 font-medium">Order</th>
+                  <th className="px-4 py-3 font-medium">Commande</th>
                   <th className="px-4 py-3 font-medium">Date</th>
-                  <th className="px-4 py-3 font-medium">Customer</th>
+                  <th className="px-4 py-3 font-medium">Client</th>
                   <th className="px-4 py-3 font-medium">Wilaya</th>
-                  <th className="px-4 py-3 font-medium text-right">Items</th>
+                  <th className="px-4 py-3 font-medium text-right">Articles</th>
                   <th className="px-4 py-3 font-medium text-right">Total</th>
-                  <th className="px-4 py-3 font-medium">Status</th>
+                  <th className="px-4 py-3 font-medium">Statut</th>
                 </tr>
               </thead>
               <tbody>
@@ -132,7 +132,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Searc
                       {cell(
                         <>
                           <div>{o.wilaya}</div>
-                          <div className="text-secondary text-xs">{o.deliveryType === "HOME" ? "Home" : "Stop-desk"}</div>
+                          <div className="text-secondary text-xs">{o.deliveryType === "HOME" ? "Domicile" : "Bureau"}</div>
                         </>
                       )}
                       {cell(o.itemCount, "text-right")}
@@ -164,11 +164,11 @@ export default async function OrdersPage({ searchParams }: { searchParams: Searc
           <div className="flex items-center justify-between mt-6 text-sm">
             <span className="text-secondary">{total} orders</span>
             <div className="flex items-center gap-4">
-              {page > 1 && <Link href={href({ status, stage, q, ...dates, page: page - 1 })} className="hover:underline">← Newer</Link>}
+              {page > 1 && <Link href={href({ status, stage, q, ...dates, page: page - 1 })} className="hover:underline">← Plus récentes</Link>}
               <span className="text-secondary">
                 Page {page} / {pageCount}
               </span>
-              {page < pageCount && <Link href={href({ status, stage, q, ...dates, page: page + 1 })} className="hover:underline">Older →</Link>}
+              {page < pageCount && <Link href={href({ status, stage, q, ...dates, page: page + 1 })} className="hover:underline">Plus anciennes →</Link>}
             </div>
           </div>
         </>

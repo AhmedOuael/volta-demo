@@ -24,8 +24,8 @@ const MUTED = "#898781";
 const INK = "#0b0b0b";
 const INK_2 = "#52514e";
 
-const compact = new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 });
-const full = new Intl.NumberFormat("en-US");
+const compact = new Intl.NumberFormat("fr-FR", { notation: "compact", maximumFractionDigits: 1 });
+const full = new Intl.NumberFormat("fr-FR");
 
 export type ValueKind = "dzd" | "count";
 const fmtFull = (v: number, kind: ValueKind) => (kind === "dzd" ? `${full.format(v)} DZD` : full.format(v));

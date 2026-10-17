@@ -25,21 +25,21 @@ export default async function ClientsPage({ searchParams }: { searchParams: Sear
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
         <div>
           <h1 className="font-display text-3xl">Clients</h1>
-          <p className="text-sm text-secondary mt-1">Everyone who has placed an order, most recent first.</p>
+          <p className="text-sm text-secondary mt-1">Toutes les personnes ayant passé commande, les plus récentes d'abord.</p>
         </div>
         <form action="/admin/clients" className="flex gap-2 w-full md:w-auto">
           <input
             name="q"
             defaultValue={q}
-            placeholder="Name or phone"
+            placeholder="Nom ou téléphone"
             className="flex-1 md:w-72 bg-transparent border border-outline-variant px-3 py-2 text-sm focus:outline-none focus:border-primary"
           />
-          <button className="px-4 py-2 bg-primary text-on-primary text-xs font-medium tracking-label uppercase">Search</button>
+          <button className="px-4 py-2 bg-primary text-on-primary text-xs font-medium tracking-label uppercase">Rechercher</button>
         </form>
       </div>
 
       {rows.length === 0 ? (
-        <p className="text-secondary py-24 text-center">{q ? `No clients matching "${q}".` : "No clients yet. They appear here after their first order."}</p>
+        <p className="text-secondary py-24 text-center">{q ? `Aucun client ne correspond à « ${q} ».` : "Aucun client pour l'instant. Ils apparaissent ici après leur première commande."}</p>
       ) : (
         <>
           <div className="hidden md:block border border-outline-variant overflow-x-auto">
@@ -48,11 +48,11 @@ export default async function ClientsPage({ searchParams }: { searchParams: Sear
                 <tr>
                   <th className="px-4 py-3 font-medium">Client</th>
                   <th className="px-4 py-3 font-medium">Wilaya</th>
-                  <th className="px-4 py-3 font-medium text-right">Orders</th>
-                  <th className="px-4 py-3 font-medium text-right">Delivered</th>
-                  <th className="px-4 py-3 font-medium text-right">Refused / returned</th>
-                  <th className="px-4 py-3 font-medium text-right">Spent</th>
-                  <th className="px-4 py-3 font-medium">Last order</th>
+                  <th className="px-4 py-3 font-medium text-right">Commandes</th>
+                  <th className="px-4 py-3 font-medium text-right">Livrées</th>
+                  <th className="px-4 py-3 font-medium text-right">Refusées / retournées</th>
+                  <th className="px-4 py-3 font-medium text-right">Dépensé</th>
+                  <th className="px-4 py-3 font-medium">Dernière commande</th>
                 </tr>
               </thead>
               <tbody>
@@ -101,8 +101,8 @@ export default async function ClientsPage({ searchParams }: { searchParams: Sear
                 </div>
                 <div className="text-sm text-secondary">{formatPhone(c.phone)} · {c.wilaya}</div>
                 <div className="text-xs mt-2">
-                  {c.orders} orders · {c.delivered} delivered
-                  {c.refusedOrReturned > 0 && <span className="text-error font-semibold"> · {c.refusedOrReturned} refused/returned</span>}
+                  {c.orders} commande{c.orders === 1 ? "" : "s"} · {c.delivered} livrée{c.delivered === 1 ? "" : "s"}
+                  {c.refusedOrReturned > 0 && <span className="text-error font-semibold"> · {c.refusedOrReturned} refusée(s)/retournée(s)</span>}
                 </div>
               </Link>
             ))}
@@ -111,9 +111,9 @@ export default async function ClientsPage({ searchParams }: { searchParams: Sear
           <div className="flex items-center justify-between mt-6 text-sm">
             <span className="text-secondary">{total} clients</span>
             <div className="flex items-center gap-4">
-              {page > 1 && <Link href={href({ q, page: page - 1 })} className="hover:underline">Previous</Link>}
+              {page > 1 && <Link href={href({ q, page: page - 1 })} className="hover:underline">Précédent</Link>}
               <span className="text-secondary">Page {page} / {pageCount}</span>
-              {page < pageCount && <Link href={href({ q, page: page + 1 })} className="hover:underline">Next</Link>}
+              {page < pageCount && <Link href={href({ q, page: page + 1 })} className="hover:underline">Suivant</Link>}
             </div>
           </div>
         </>

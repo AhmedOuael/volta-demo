@@ -1,4 +1,4 @@
-const dateTime = new Intl.DateTimeFormat("en-GB", {
+const dateTime = new Intl.DateTimeFormat("fr-FR", {
   timeZone: "Africa/Algiers",
   day: "2-digit",
   month: "short",
@@ -11,8 +11,9 @@ export function formatDateTime(iso: string) {
   return dateTime.format(new Date(iso));
 }
 
+/** 14500 -> "14 500 DA" with non-breaking spaces, so a price never wraps. */
 export function formatDZD(amount: number) {
-  return `${amount.toLocaleString("en-US")} DZD`;
+  return `${amount.toLocaleString("fr-FR").replace(/[\s ]/g, " ")} DA`;
 }
 
 /** 0551234567 -> 0551 23 45 67 */

@@ -21,17 +21,17 @@ export function isOrderStatus(value: unknown): value is OrderStatus {
 }
 
 export const STATUS_LABELS: Record<OrderStatus, string> = {
-  NEW: "New",
-  CALLED: "Called",
-  CUSTOMER_UNREACHABLE: "Unreachable",
-  CONFIRMED: "Confirmed",
-  PREPARING: "Preparing",
-  AT_DELIVERY_DESK: "At stop-desk",
-  OUT_FOR_DELIVERY: "Out for delivery",
-  DELIVERED: "Delivered",
-  REFUSED: "Refused",
-  RETURNED: "Returned",
-  CANCELED: "Canceled",
+  NEW: "Nouvelle",
+  CALLED: "Appelée",
+  CUSTOMER_UNREACHABLE: "Client injoignable",
+  CONFIRMED: "Confirmée",
+  PREPARING: "En préparation",
+  AT_DELIVERY_DESK: "Au bureau de livraison",
+  OUT_FOR_DELIVERY: "En cours de livraison",
+  DELIVERED: "Livrée",
+  REFUSED: "Refusée",
+  RETURNED: "Retournée",
+  CANCELED: "Annulée",
 };
 
 /** Which statuses an order can move to from each status. Empty = final. */
@@ -51,8 +51,8 @@ export const STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
 
 /** Groups of statuses the overview links to (e.g. /admin/orders?stage=to-call). */
 export const ORDER_STAGES = {
-  "to-call": { label: "Needs a call", statuses: ["NEW", "CALLED", "CUSTOMER_UNREACHABLE"] as OrderStatus[] },
-  "on-the-road": { label: "On the road", statuses: ["OUT_FOR_DELIVERY", "AT_DELIVERY_DESK"] as OrderStatus[] },
+  "to-call": { label: "À appeler", statuses: ["NEW", "CALLED", "CUSTOMER_UNREACHABLE"] as OrderStatus[] },
+  "on-the-road": { label: "En route", statuses: ["OUT_FOR_DELIVERY", "AT_DELIVERY_DESK"] as OrderStatus[] },
 } as const;
 export type OrderStage = keyof typeof ORDER_STAGES;
 export const isOrderStage = (v: unknown): v is OrderStage => typeof v === "string" && v in ORDER_STAGES;

@@ -8,9 +8,9 @@ export default async function UsersPage() {
 
   return (
     <div className="max-w-4xl">
-      <h1 className="font-display text-3xl mb-2">Team</h1>
+      <h1 className="font-display text-3xl mb-2">Équipe</h1>
       <p className="text-sm text-secondary mb-8">
-        Staff can handle orders. Admins can also manage the team (and products, coming next).
+        L'équipe traite les commandes. Les administrateurs gèrent aussi l'équipe et les produits.
       </p>
       <TeamManager users={users} currentUserId={me.id.toString()} />
     </div>

@@ -152,18 +152,18 @@ type CleanVariant = {
 };
 
 function parseForm(input: unknown) {
-  if (!isRecord(input)) throw new ProductError("Invalid request.");
+  if (!isRecord(input)) throw new ProductError("Requête invalide.");
 
   const name = str(input.name).replace(/\s+/g, " ");
-  if (name.length < 2 || name.length > 120) throw new ProductError("Enter a product name (2–120 characters).");
+  if (name.length < 2 || name.length > 120) throw new ProductError("Entrez un nom de produit (2 à 120 caractères).");
 
   const slug = str(input.slug).toLowerCase();
   if (!SLUG.test(slug) || slug.length > 80) {
-    throw new ProductError("The URL may only contain lowercase letters, numbers and dashes, like heavy-box-hoodie.");
+    throw new ProductError("L'adresse ne peut contenir que des minuscules, des chiffres et des tirets, par exemple micro-sans-fil-duo.");
   }
 
   const description = str(input.description);
-  if (description.length > 2000) throw new ProductError("The description is too long (2,000 characters max).");
+  if (description.length > 2000) throw new ProductError("La description est trop longue (2 000 caractères maximum).");
 
   const details = Array.isArray(input.details) ? input.details.map(str).filter(Boolean) : [];
   if (details.length > 12 || details.some((d) => d.length > 120)) {
@@ -173,26 +173,26 @@ function parseForm(input: unknown) {
   const categoryIds = Array.isArray(input.categoryIds) ? [...new Set(input.categoryIds.filter((c) => typeof c === "string" && ID.test(c)))] : [];
 
   const images = Array.isArray(input.images) ? input.images.filter((i): i is string => typeof i === "string") : [];
-  if (images.length > 12 || images.some((i) => !IMAGE_VALUE.test(i))) throw new ProductError("Invalid photo list.");
+  if (images.length > 12 || images.some((i) => !IMAGE_VALUE.test(i))) throw new ProductError("Liste de photos invalide.");
 
   if (!Array.isArray(input.variants) || input.variants.length === 0) {
-    throw new ProductError("Add at least one size.");
+    throw new ProductError("Ajoutez au moins une version.");
   }
-  if (input.variants.length > 50) throw new ProductError("A product can have at most 50 sizes/colors.");
+  if (input.variants.length > 50) throw new ProductError("Un produit peut avoir au maximum 50 versions.");
 
   const variants: CleanVariant[] = input.variants.map((raw, i) => {
-    const row = `Row ${i + 1}`;
-    if (!isRecord(raw)) throw new ProductError(`${row}: invalid.`);
+    const row = `Ligne ${i + 1}`;
+    if (!isRecord(raw)) throw new ProductError(`${row} : invalide.`);
     const size = str(raw.size);
     const color = str(raw.color);
     const sku = str(raw.sku).toUpperCase();
     const price = str(raw.price);
     const stock = Number(raw.physicalStock);
-    if (!size && !color) throw new ProductError(`${row}: enter a size or a color.`);
-    if (size.length > 20 || color.length > 40) throw new ProductError(`${row}: size or color is too long.`);
-    if (!SKU.test(sku)) throw new ProductError(`${row}: the SKU may only use letters, numbers, dots and dashes.`);
-    if (!PRICE.test(price)) throw new ProductError(`${row}: enter a valid price.`);
-    if (!Number.isInteger(stock) || stock < 0 || stock > 100000) throw new ProductError(`${row}: enter a stock between 0 and 100,000.`);
+    if (!size && !color) throw new ProductError(`${row} : indiquez une variante ou une couleur.`);
+    if (size.length > 20 || color.length > 40) throw new ProductError(`${row} : la variante ou la couleur est trop longue.`);
+    if (!SKU.test(sku)) throw new ProductError(`${row} : la référence ne peut contenir que des lettres, des chiffres, des points et des tirets.`);
+    if (!PRICE.test(price)) throw new ProductError(`${row} : indiquez un prix valide.`);
+    if (!Number.isInteger(stock) || stock < 0 || stock > 100000) throw new ProductError(`${row} : indiquez un stock entre 0 et 100 000.`);
     const id = typeof raw.id === "string" && ID.test(raw.id) ? BigInt(raw.id) : null;
     return {
       id,
@@ -208,11 +208,11 @@ function parseForm(input: unknown) {
   const skus = new Set<string>();
   const combos = new Set<string>();
   for (const v of variants) {
-    if (skus.has(v.sku)) throw new ProductError(`The SKU ${v.sku} is used twice.`);
+    if (skus.has(v.sku)) throw new ProductError(`La référence ${v.sku} est utilisée deux fois.`);
     skus.add(v.sku);
     const combo = `${(v.color ?? "").toLowerCase()}|${(v.size ?? "").toLowerCase()}`;
     if (combos.has(combo)) {
-      throw new ProductError(`${[v.color, v.size].filter(Boolean).join(" / ")} is listed twice.`);
+      throw new ProductError(`${[v.color, v.size].filter(Boolean).join(" / ")} apparaît deux fois.`);
     }
     combos.add(combo);
   }
@@ -239,7 +239,7 @@ export async function saveProduct(idParam: string | null, input: unknown): Promi
   try {
     const data = parseForm(input);
     const productId = idParam && ID.test(idParam) ? BigInt(idParam) : null;
-    if (idParam && !productId) throw new ProductError("Product not found.");
+    if (idParam && !productId) throw new ProductError("Produit introuvable.");
 
     const result = await prisma.$transaction(async (tx) => {
       const existing = productId
@@ -248,21 +248,21 @@ export async function saveProduct(idParam: string | null, input: unknown): Promi
             include: { images: true, variants: { include: { _count: { select: { orderItems: true } } } } },
           })
         : null;
-      if (productId && !existing) throw new ProductError("Product not found.");
+      if (productId && !existing) throw new ProductError("Produit introuvable.");
 
       const slugOwner = await tx.product.findUnique({ where: { slug: data.slug }, select: { id: true } });
-      if (slugOwner && slugOwner.id !== productId) throw new ProductError("Another product already uses this URL.");
+      if (slugOwner && slugOwner.id !== productId) throw new ProductError("Un autre produit utilise déjà cette adresse.");
 
       const skuOwners = await tx.productVariant.findMany({
         where: { sku: { in: data.variants.map((v) => v.sku) } },
         select: { id: true, sku: true, productId: true },
       });
       const taken = skuOwners.find((owner) => owner.productId !== productId);
-      if (taken) throw new ProductError(`The SKU ${taken.sku} is already used by another product.`);
+      if (taken) throw new ProductError(`La référence ${taken.sku} est déjà utilisée par un autre produit.`);
 
       if (data.categoryIds.length) {
         const found = await tx.category.count({ where: { id: { in: data.categoryIds } } });
-        if (found !== data.categoryIds.length) throw new ProductError("A selected category no longer exists.");
+        if (found !== data.categoryIds.length) throw new ProductError("Une catégorie sélectionnée n'existe plus.");
       }
 
       const fields = {
@@ -312,10 +312,10 @@ export async function saveProduct(idParam: string | null, input: unknown): Promi
         };
         if (v.id) {
           const old = existing?.variants.find((o) => o.id === v.id);
-          if (!old) throw new ProductError("A size in the form doesn't belong to this product. Reload the page.");
+          if (!old) throw new ProductError("Une version du formulaire n'appartient pas à ce produit. Rechargez la page.");
           if (v.physicalStock < old.reservedStock) {
             const label = [v.color, v.size].filter(Boolean).join(" / ");
-            throw new ProductError(`${label}: stock can't be below the ${old.reservedStock} reserved by open orders.`);
+            throw new ProductError(`${label} : le stock ne peut pas être inférieur aux ${old.reservedStock} unités réservées par des commandes en cours.`);
           }
           await tx.productVariant.update({ where: { id: v.id }, data: values });
         } else {
@@ -333,7 +333,7 @@ export async function saveProduct(idParam: string | null, input: unknown): Promi
   } catch (error) {
     if (error instanceof ProductError) return { ok: false, error: error.message };
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
-      return { ok: false, error: "Two sizes clash (same SKU, or same size and color). Check the sizes table." };
+      return { ok: false, error: "Deux versions entrent en conflit (même SKU, ou même version et couleur). Vérifiez le tableau." };
     }
     throw error;
   }
@@ -344,12 +344,12 @@ export async function saveProduct(idParam: string | null, input: unknown): Promi
  * orders keep their history; others are deleted with their photos.
  */
 export async function deleteProduct(idParam: string): Promise<ActionResult & { archived?: boolean; slug?: string }> {
-  if (!ID.test(idParam)) return { ok: false, error: "Product not found." };
+  if (!ID.test(idParam)) return { ok: false, error: "Produit introuvable." };
   const product = await prisma.product.findUnique({
     where: { id: BigInt(idParam) },
     include: { images: true, variants: { include: { _count: { select: { orderItems: true } } } } },
   });
-  if (!product) return { ok: false, error: "Product not found." };
+  if (!product) return { ok: false, error: "Produit introuvable." };
 
   const ordered = product.variants.some((v) => v._count.orderItems > 0 || v.reservedStock > 0);
   if (ordered) {
@@ -362,7 +362,7 @@ export async function deleteProduct(idParam: string): Promise<ActionResult & { a
 
 export async function createCategory(nameInput: unknown): Promise<ActionResult & { category?: CategoryOption }> {
   const name = str(nameInput).replace(/\s+/g, " ");
-  if (name.length < 2 || name.length > 40) return { ok: false, error: "Category names are 2–40 characters." };
+  if (name.length < 2 || name.length > 40) return { ok: false, error: "Les noms de catégorie font de 2 à 40 caractères." };
   const existing = await prisma.category.findFirst({ where: { name: { equals: name, mode: "insensitive" } } });
   if (existing) {
     if (!existing.active) await prisma.category.update({ where: { id: existing.id }, data: { active: true } });

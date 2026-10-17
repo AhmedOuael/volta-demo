@@ -35,6 +35,6 @@ describe("imageUrl", () => {
 });
 
 describe("formatting", () => {
-  it("formats prices the same everywhere", () => expect(formatDZD(14500)).toBe("14,500 DZD"));
+  it("formats prices the Algerian way, with non-breaking spaces", () => expect(formatDZD(14500)).toBe("14 500 DA"));
   it("groups phone digits", () => expect(formatPhone("0551234567")).toBe("0551 23 45 67"));
 });

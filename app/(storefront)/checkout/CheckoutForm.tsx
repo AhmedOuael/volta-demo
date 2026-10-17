@@ -15,8 +15,8 @@ type DeliveryType = "HOME" | "STOP_DESK";
 type Field = "fullName" | "phone" | "wilaya" | "deliveryType" | "items";
 
 const DELIVERY_OPTIONS: { value: DeliveryType; label: string; hint: string }[] = [
-  { value: "HOME", label: "Home delivery", hint: "Delivered to your door" },
-  { value: "STOP_DESK", label: "Stop-desk", hint: "Pick up at the delivery office" },
+  { value: "HOME", label: "Livraison à domicile", hint: "Livrée à votre porte" },
+  { value: "STOP_DESK", label: "Bureau de livraison", hint: "À récupérer au bureau du transporteur" },
 ];
 
 const inputClass =
@@ -82,12 +82,12 @@ export default function CheckoutForm({ wilayas, buyNow }: { wilayas: WilayaOptio
   if (items.length === 0) {
     return (
       <div className="text-center py-24">
-        <p className="text-secondary mb-8">Your bag is empty.</p>
+        <p className="text-secondary mb-8">Votre panier est vide.</p>
         <Link
           href="/products"
           className="inline-block bg-primary text-on-primary px-10 py-4 rounded-full text-sm font-medium tracking-label uppercase hover:opacity-90 transition-opacity"
         >
-          Explore Collection
+          Voir la boutique
         </Link>
       </div>
     );
@@ -114,7 +114,7 @@ export default function CheckoutForm({ wilayas, buyNow }: { wilayas: WilayaOptio
           setError({ message: result.error, field: result.field });
         }
       } catch {
-        setError({ message: "Something went wrong. Please check your connection and try again." });
+        setError({ message: "Une erreur s'est produite. Vérifiez votre connexion et réessayez." });
       }
     });
   };
@@ -127,10 +127,10 @@ export default function CheckoutForm({ wilayas, buyNow }: { wilayas: WilayaOptio
     <form onSubmit={handleSubmit} noValidate className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-12 lg:gap-20">
       <div className="space-y-10">
         <section>
-          <h2 className="text-xs font-medium tracking-label uppercase mb-6">Your details</h2>
+          <h2 className="text-xs font-medium tracking-label uppercase mb-6">Vos coordonnées</h2>
           <div className="space-y-5">
             <label className="block">
-              <span className="text-sm mb-2 block">Full name</span>
+              <span className="text-sm mb-2 block">Nom complet</span>
               <input
                 className={`${inputClass} ${borderFor("fullName")}`}
                 value={fullName}
@@ -142,7 +142,7 @@ export default function CheckoutForm({ wilayas, buyNow }: { wilayas: WilayaOptio
               {fieldError("fullName")}
             </label>
             <label className="block">
-              <span className="text-sm mb-2 block">Phone number</span>
+              <span className="text-sm mb-2 block">Numéro de téléphone</span>
               <input
                 className={`${inputClass} ${borderFor("phone")}`}
                 value={phone}
@@ -165,7 +165,7 @@ export default function CheckoutForm({ wilayas, buyNow }: { wilayas: WilayaOptio
                 required
               >
                 <option value="" disabled>
-                  Choose your wilaya
+                  Choisissez votre wilaya
                 </option>
                 {wilayas.map((w) => (
                   <option key={w.id} value={w.id}>
@@ -179,7 +179,7 @@ export default function CheckoutForm({ wilayas, buyNow }: { wilayas: WilayaOptio
             {/* Honeypot: hidden from people, bots tend to fill it in. */}
             <div aria-hidden="true" className="absolute left-[-9999px] w-px h-px overflow-hidden">
               <label>
-                Website
+                Site web
                 <input tabIndex={-1} autoComplete="off" value={website} onChange={(e) => setWebsite(e.target.value)} />
               </label>
             </div>
@@ -187,7 +187,7 @@ export default function CheckoutForm({ wilayas, buyNow }: { wilayas: WilayaOptio
         </section>
 
         <section>
-          <h2 className="text-xs font-medium tracking-label uppercase mb-6">Delivery</h2>
+          <h2 className="text-xs font-medium tracking-label uppercase mb-6">Livraison</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {DELIVERY_OPTIONS.map((opt) => {
               const optFee = fees[opt.value];
@@ -212,7 +212,7 @@ export default function CheckoutForm({ wilayas, buyNow }: { wilayas: WilayaOptio
                     <span className="flex justify-between gap-2 text-sm font-medium">
                       {opt.label}
                       <span className="font-semibold whitespace-nowrap">
-                        {!wilayaId ? "" : quoting ? "…" : typeof optFee === "number" ? formatDZD(optFee) : "Unavailable"}
+                        {!wilayaId ? "" : quoting ? "…" : typeof optFee === "number" ? formatDZD(optFee) : "Indisponible"}
                       </span>
                     </span>
                     <span className="block text-xs text-secondary mt-1">{opt.hint}</span>
@@ -223,13 +223,13 @@ export default function CheckoutForm({ wilayas, buyNow }: { wilayas: WilayaOptio
           </div>
           {fieldError("deliveryType")}
           <p className="text-xs text-secondary mt-4">
-            Our team will call you to confirm your order and your exact delivery address.
+            Nous vous appellerons pour confirmer la commande et votre adresse exacte de livraison.
           </p>
         </section>
       </div>
 
       <aside className="lg:sticky lg:top-28 h-fit bg-surface-container-low p-6 md:p-8">
-        <h2 className="text-xs font-medium tracking-label uppercase mb-2">Your order</h2>
+        <h2 className="text-xs font-medium tracking-label uppercase mb-2">Votre commande</h2>
         {notice && <p className="my-4 p-3 bg-surface-container text-xs">{notice}</p>}
         <div>
           {items.map((item) => (
@@ -238,12 +238,12 @@ export default function CheckoutForm({ wilayas, buyNow }: { wilayas: WilayaOptio
         </div>
         <div className="pt-6 space-y-3 text-sm">
           <div className="flex justify-between">
-            <span className="text-secondary">Subtotal</span>
+            <span className="text-secondary">Sous-total</span>
             <span>{formatDZD(subtotal)}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-secondary">Delivery</span>
-            <span>{typeof fee === "number" ? formatDZD(fee) : "Choose your wilaya"}</span>
+            <span className="text-secondary">Livraison</span>
+            <span>{typeof fee === "number" ? formatDZD(fee) : "Choisissez votre wilaya"}</span>
           </div>
           <div className="flex justify-between pt-3 border-t border-outline-variant text-base font-semibold">
             <span>Total</span>
@@ -256,7 +256,7 @@ export default function CheckoutForm({ wilayas, buyNow }: { wilayas: WilayaOptio
             {error.message}{" "}
             {error.field === "items" && (
               <Link href={buyNow ? `/products/${buyNow.slug}` : "/cart"} className="underline">
-                {buyNow ? "Back to the product" : "Review your bag"}
+                {buyNow ? "Retour au produit" : "Vérifier le panier"}
               </Link>
             )}
           </p>
@@ -267,12 +267,12 @@ export default function CheckoutForm({ wilayas, buyNow }: { wilayas: WilayaOptio
           disabled={submitting || syncing || quoting || noDelivery}
           className="mt-8 w-full bg-primary text-on-primary py-4 rounded-full text-sm font-medium tracking-label uppercase hover:opacity-90 transition-opacity disabled:opacity-40"
         >
-          {submitting ? "Placing order…" : "Place order"}
+          {submitting ? "Envoi de la commande…" : "Commander"}
         </button>
         {noDelivery ? (
-          <p className="text-xs text-error text-center mt-4">We can&apos;t deliver to this wilaya at the moment.</p>
+          <p className="text-xs text-error text-center mt-4">Nous ne livrons pas encore cette wilaya.</p>
         ) : (
-          <p className="text-xs text-secondary text-center mt-4">Pay in cash when you receive your order</p>
+          <p className="text-xs text-secondary text-center mt-4">Vous payez en espèces à la réception</p>
         )}
       </aside>
     </form>

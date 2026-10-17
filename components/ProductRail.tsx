@@ -83,10 +83,10 @@ export default function ProductRail({ products, label, header }: { products: Cat
       <div className="flex items-end justify-between gap-6 mb-12">
         <div className="flex-1 min-w-0">{header}</div>
         <div className="hidden md:flex gap-2 shrink-0">
-          <button type="button" onClick={() => page(-1)} disabled={atStart} aria-label="Previous products" className={arrow}>
+          <button type="button" onClick={() => page(-1)} disabled={atStart} aria-label="Produits précédents" className={arrow}>
             <ChevronLeft size={18} />
           </button>
-          <button type="button" onClick={() => page(1)} disabled={atEnd} aria-label="Next products" className={arrow}>
+          <button type="button" onClick={() => page(1)} disabled={atEnd} aria-label="Produits suivants" className={arrow}>
             <ChevronRight size={18} />
           </button>
         </div>

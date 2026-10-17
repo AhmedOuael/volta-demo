@@ -5,10 +5,10 @@ import { STATUS_LABELS, STATUS_TRANSITIONS, type OrderStatus } from "@/lib/order
 import { setOrderStatus } from "../actions";
 
 const CONFIRM_TEXT: Partial<Record<OrderStatus, string>> = {
-  CANCELED: "Cancel this order? Its reserved stock goes back on sale.",
-  DELIVERED: "Mark as delivered? Stock is removed for good.",
-  REFUSED: "Mark as refused by the customer?",
-  RETURNED: "Mark as returned? Its stock goes back on sale.",
+  CANCELED: "Annuler cette commande ? Le stock réservé est remis en vente.",
+  DELIVERED: "Marquer comme livrée ? Le stock est retiré définitivement.",
+  REFUSED: "Marquer comme refusée par le client ?",
+  RETURNED: "Marquer comme retournée ? Le stock est remis en vente.",
 };
 
 const SUCCESS: OrderStatus[] = ["CONFIRMED", "DELIVERED"];
@@ -19,7 +19,7 @@ export default function StatusActions({ orderId, status }: { orderId: string; st
   const [pending, startTransition] = useTransition();
   const next = STATUS_TRANSITIONS[status];
 
-  if (next.length === 0) return <p className="text-sm text-secondary">This order is closed.</p>;
+  if (next.length === 0) return <p className="text-sm text-secondary">Cette commande est clôturée.</p>;
 
   const change = (to: OrderStatus) => {
     const question = CONFIRM_TEXT[to];

@@ -29,9 +29,9 @@ const isRole = (v: unknown): v is Role => v === "ADMIN" || v === "STAFF";
 
 function checkPassword(password: unknown): string | null {
   if (typeof password !== "string" || password.length < MIN_PASSWORD_LENGTH) {
-    return `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`;
+    return `Le mot de passe doit contenir au moins ${MIN_PASSWORD_LENGTH} caractères.`;
   }
-  if (password.length > 200) return "Password is too long.";
+  if (password.length > 200) return "Mot de passe trop long.";
   return null;
 }
 
@@ -42,15 +42,15 @@ export async function createUser(input: {
   password: unknown;
 }): Promise<ActionResult> {
   const email = typeof input.email === "string" ? input.email.trim().toLowerCase() : "";
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 200) return { ok: false, error: "Enter a valid email." };
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 200) return { ok: false, error: "Entrez une adresse e-mail valide." };
   const name = typeof input.name === "string" ? input.name.trim() : "";
-  if (name.length < 2 || name.length > 80) return { ok: false, error: "Enter the person's name." };
-  if (!isRole(input.role)) return { ok: false, error: "Choose a role." };
+  if (name.length < 2 || name.length > 80) return { ok: false, error: "Entrez le nom de la personne." };
+  if (!isRole(input.role)) return { ok: false, error: "Choisissez un rôle." };
   const passwordError = checkPassword(input.password);
   if (passwordError) return { ok: false, error: passwordError };
 
   if (await prisma.user.findUnique({ where: { email } })) {
-    return { ok: false, error: "A user with this email already exists." };
+    return { ok: false, error: "Un utilisateur avec cet e-mail existe déjà." };
   }
   await prisma.user.create({
     data: { email, name, role: input.role, passwordHash: await hashPassword(input.password as string) },
@@ -59,8 +59,8 @@ export async function createUser(input: {
 }
 
 function parseTarget(id: unknown, actor: SessionUser): bigint | string {
-  if (typeof id !== "string" || !/^\d{1,18}$/.test(id)) return "User not found.";
-  if (BigInt(id) === actor.id) return "You can't change your own account here.";
+  if (typeof id !== "string" || !/^\d{1,18}$/.test(id)) return "Utilisateur introuvable.";
+  if (BigInt(id) === actor.id) return "Vous ne pouvez pas modifier votre propre compte ici.";
   return BigInt(id);
 }
 

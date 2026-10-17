@@ -8,12 +8,12 @@ const TZ = "Africa/Algiers";
 const OFFSET_MS = 60 * 60 * 1000;
 
 export const PERIODS = [
-  { key: "today", label: "Today" },
-  { key: "7d", label: "7 days" },
-  { key: "30d", label: "30 days" },
-  { key: "month", label: "This month" },
-  { key: "12m", label: "12 months" },
-  { key: "all", label: "All time" },
+  { key: "today", label: "Aujourd'hui" },
+  { key: "7d", label: "7 jours" },
+  { key: "30d", label: "30 jours" },
+  { key: "month", label: "Ce mois-ci" },
+  { key: "12m", label: "12 mois" },
+  { key: "all", label: "Depuis le début" },
 ] as const;
 export type PeriodKey = (typeof PERIODS)[number]["key"];
 export const DEFAULT_PERIOD: PeriodKey = "12m";
@@ -213,13 +213,13 @@ export async function getOverview(period: PeriodKey, now = new Date()): Promise<
     lowStock: lowStockRows.map((r) => ({
       productId: r.productId.toString(),
       product: r.product,
-      variant: [r.color, r.size].filter(Boolean).join(" / ") || "One size",
+      variant: [r.color, r.size].filter(Boolean).join(" / ") || "Standard",
       available: Math.max(0, n(r.available)),
     })),
   };
 }
 
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTHS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
 
 /** Every bucket in the range, including empty ones, so gaps show as zero instead of disappearing. */
 function buildTrend(
