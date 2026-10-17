@@ -14,4 +14,7 @@ if (testUrl) {
   }
   // Set before lib/prisma is imported; dotenv never overrides an existing value.
   process.env.DATABASE_URL = testUrl;
+} else {
+  // No test branch: make any accidental database access fail instead of reaching the live DB.
+  process.env.DATABASE_URL = "postgresql://no-test-database.invalid/none";
 }
