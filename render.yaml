@@ -1,0 +1,24 @@
+# Render Blueprint for the demo store (free web service).
+# Secrets marked sync: false are asked for once, when the Blueprint is created.
+services:
+  - type: web
+    name: volta-demo
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: DEMO_MODE
+        value: "true"
+      - key: STORE_WHATSAPP
+        value: "213775033679"
+      - key: DEMO_PASSWORD
+        value: demo-volta-2026
+      - key: DATABASE_URL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
