@@ -16,5 +16,7 @@ export default defineConfig({
     include: ["tests/unit/**/*.test.ts", "tests/integration/**/*.test.ts"],
     setupFiles: ["tests/setup.ts"],
     testTimeout: 60_000,
+    // Integration files share one test database and the reset test empties it: run files one at a time then.
+    fileParallelism: !process.env.TEST_DATABASE_URL,
   },
 });
