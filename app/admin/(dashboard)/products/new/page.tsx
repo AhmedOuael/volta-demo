@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/brand/BrandLink";
 import { requireUser } from "@/lib/auth/session";
 import { listCategories } from "@/lib/admin/products";
 import ProductForm from "../ProductForm";

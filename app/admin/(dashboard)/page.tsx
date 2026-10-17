@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/brand/BrandLink";
 import { requireUser } from "@/lib/auth/session";
 import { DEFAULT_PERIOD, PERIODS, algiersDate, getOverview, isPeriod, type PeriodKey } from "@/lib/admin/stats";
 import { formatDZD } from "@/lib/format";

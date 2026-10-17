@@ -1,31 +1,31 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { BrandProvider } from "@/components/brand/BrandProvider";
+import { getBrand } from "@/lib/brand/server";
+import { brandCssVars } from "@/lib/brand/theme";
 import { SITE } from "@/lib/site";
 
-export const metadata: Metadata = {
-  metadataBase: new URL(SITE.url),
-  title: { default: SITE.title, template: `%s | ${SITE.name}` },
-  description: SITE.description,
-  alternates: { canonical: "/" },
-  openGraph: {
-    type: "website",
-    siteName: SITE.name,
-    title: SITE.title,
-    description: SITE.description,
-    url: "/",
-    images: [{ url: SITE.ogImage, width: 1672, height: 941, alt: "NOIR Autumn–Winter 2026" }],
-  },
-  twitter: { card: "summary_large_image", title: SITE.title, description: SITE.description, images: [SITE.ogImage] },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const brand = await getBrand();
+  const isPrivate = brand.visibility === "private";
+  return {
+    metadataBase: new URL(SITE.url),
+    title: { default: `${brand.name} | ${brand.tagline}`, template: `%s | ${brand.name}` },
+    description: `${brand.tagline}. ${brand.deliveryPromise}.`,
+    icons: { icon: brand.logo },
+    // Private previews are proposals for one store: never indexed (proxy.ts also sends X-Robots-Tag).
+    robots: isPrivate ? { index: false, follow: false } : undefined,
+    openGraph: isPrivate ? undefined : { type: "website", siteName: brand.name, title: brand.name, description: brand.tagline, url: "/" },
+  };
+}
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const brand = await getBrand();
   return (
-    <html lang="en">
-      <body className="min-h-screen antialiased bg-surface text-on-surface" suppressHydrationWarning>{children}</body>
+    <html lang="fr" style={brandCssVars(brand) as React.CSSProperties}>
+      <body className="min-h-screen antialiased bg-surface text-on-surface" suppressHydrationWarning>
+        <BrandProvider brand={brand}>{children}</BrandProvider>
+      </body>
     </html>
   );
 }

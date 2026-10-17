@@ -26,3 +26,8 @@ export function brandHref(path: string, slug: string): string {
 export function resolveBrand(headerValue: string | null): Brand {
   return (headerValue && getBrandBySlug(headerValue)) || getDefaultBrand();
 }
+
+/** Browser path without the /p/<slug> prefix, for active-link comparisons in client components. */
+export function stripPreviewPrefix(pathname: string): string {
+  return parsePreviewPath(pathname)?.rest ?? pathname;
+}

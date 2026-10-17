@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/brand/BrandLink";
 import { notFound } from "next/navigation";
 import { getBuyNowItem } from "@/lib/catalog";
 import { getWilayas } from "@/lib/delivery";

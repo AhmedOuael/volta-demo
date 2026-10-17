@@ -55,3 +55,12 @@ describe("resolveBrand", () => {
     expect(resolveBrand("unknown").slug).toBe("volta");
   });
 });
+
+describe("stripPreviewPrefix", () => {
+  it("removes /p/<slug> so pages can compare paths", async () => {
+    const { stripPreviewPrefix } = await import("@/lib/brand/routing");
+    expect(stripPreviewPrefix("/p/advancedmedia/admin/orders")).toBe("/admin/orders");
+    expect(stripPreviewPrefix("/p/advancedmedia")).toBe("/");
+    expect(stripPreviewPrefix("/admin")).toBe("/admin");
+  });
+});

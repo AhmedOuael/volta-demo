@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/brand/BrandLink";
 import { requireUser } from "@/lib/auth/session";
 import { listOrders } from "@/lib/admin/orders";
 import { ORDER_STAGES, ORDER_STATUSES, STATUS_LABELS, isOrderStage, isOrderStatus } from "@/lib/order-status";

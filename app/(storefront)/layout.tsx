@@ -7,7 +7,7 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
     <>
       <SmoothScroll />
       <Header />
-      <main className="pt-18">{children}</main>
+      <main className="pt-28">{children}</main>
       <Footer />
     </>
   );

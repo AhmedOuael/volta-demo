@@ -1,8 +1,9 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
-import Link from "next/link";
+import Link from "@/components/brand/BrandLink";
 import { useRouter } from "next/navigation";
+import { useBrandHref } from "@/components/brand/BrandProvider";
 import { useCart, type CartItem } from "@/components/cart/useCart";
 import { useCartSync } from "@/components/cart/useCartSync";
 import { CartLine } from "../cart/CartView";
@@ -27,6 +28,7 @@ const inputClass =
  */
 export default function CheckoutForm({ wilayas, buyNow }: { wilayas: WilayaOption[]; buyNow?: CartItem }) {
   const router = useRouter();
+  const brandHref = useBrandHref();
   const cart = useCart();
   const sync = useCartSync(!buyNow);
   const items = buyNow ? [buyNow] : cart.items;
@@ -107,7 +109,7 @@ export default function CheckoutForm({ wilayas, buyNow }: { wilayas: WilayaOptio
         if (result.ok) {
           setPlaced(true);
           if (!buyNow) cart.clear();
-          router.replace(`/checkout/success?order=${result.orderId}`);
+          router.replace(brandHref(`/checkout/success?order=${result.orderId}`));
         } else {
           setError({ message: result.error, field: result.field });
         }

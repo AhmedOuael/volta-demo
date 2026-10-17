@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/brand/BrandLink";
 
 export const metadata: Metadata = { title: "Order received", robots: { index: false, follow: false } };
 

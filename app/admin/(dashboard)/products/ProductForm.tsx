@@ -2,8 +2,9 @@
 
 import { useState, useTransition } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/brand/BrandLink";
 import { useRouter } from "next/navigation";
+import { useBrandHref } from "@/components/brand/BrandProvider";
 import { ChevronLeft, ChevronRight, Plus, Trash2, X } from "lucide-react";
 import { imageUrl } from "@/lib/images";
 import type { CategoryOption, ProductForm as ProductFormData, VariantForm } from "@/lib/admin/products";
@@ -51,6 +52,7 @@ export default function ProductForm({
   categories: CategoryOption[];
 }) {
   const router = useRouter();
+  const brandHref = useBrandHref();
   const isNew = !initial.id;
   const [form, setForm] = useState<ProductFormData>(initial);
   const [slugTouched, setSlugTouched] = useState(!isNew);
@@ -109,7 +111,7 @@ export default function ProductForm({
       const result = await saveProductAction(form.id ?? null, payload);
       if (!result.ok) return setMessage({ ok: false, text: result.error });
       if (isNew && result.id) {
-        router.replace(`/admin/products/${result.id}?created=1`);
+        router.replace(brandHref(`/admin/products/${result.id}?created=1`));
       } else {
         setMessage({ ok: true, text: "Saved. The shop is updated." });
         router.refresh();
@@ -122,7 +124,7 @@ export default function ProductForm({
     startTransition(async () => {
       const result = await deleteProductAction(form.id!);
       if (!result.ok) return setMessage({ ok: false, text: result.error });
-      router.replace(result.archived ? `/admin/products/${form.id}?archived=1` : "/admin/products");
+      router.replace(brandHref(result.archived ? `/admin/products/${form.id}?archived=1` : "/admin/products"));
       router.refresh();
     });
   };

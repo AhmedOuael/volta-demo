@@ -1,46 +1,47 @@
-import Link from "next/link";
+"use client";
+
+import Link from "@/components/brand/BrandLink";
+import { useBrand, useBrandHref } from "@/components/brand/BrandProvider";
 
 export default function Footer() {
+  const brand = useBrand();
+  const href = useBrandHref();
+
   return (
     <footer className="w-full border-t border-outline-variant bg-surface">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-12 px-5 md:px-16 py-20">
-        <div className="space-y-6">
-          <h2 className="font-display text-3xl text-primary">NOIR</h2>
-          <p className="text-sm text-secondary max-w-xs">
-            The intersection of archival research and modern streetwear utility. Designed in Algiers.
-          </p>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-12 px-5 md:px-16 py-16">
+        <div className="space-y-4">
+          <h2 className="font-display text-2xl font-bold text-on-surface">{brand.name}</h2>
+          <p className="text-sm text-secondary max-w-xs">{brand.tagline}</p>
+          {brand.instagram && (
+            <a href={`https://www.instagram.com/${brand.instagram}/`} target="_blank" rel="noopener" className="text-sm text-secondary hover:underline">
+              @{brand.instagram}
+            </a>
+          )}
         </div>
 
         <div>
-          <h4 className="text-xs font-semibold tracking-label uppercase mb-6">Client Services</h4>
+          <h4 className="text-xs font-semibold tracking-label uppercase mb-6 text-on-surface">Service client</h4>
           <ul className="space-y-4 text-sm text-secondary">
-            <li><Link href="/contact" className="hover:underline">Contact Us</Link></li>
-            <li><Link href="#" className="hover:underline">Shipping Policy</Link></li>
-            <li><Link href="#" className="hover:underline">Returns &amp; Exchanges</Link></li>
-            <li><Link href="#" className="hover:underline">Size Guide</Link></li>
+            <li><Link href={href("/products")} className="hover:underline">Boutique</Link></li>
+            <li><Link href={href("/contact")} className="hover:underline">Nous contacter</Link></li>
+            <li><Link href={href("/about")} className="hover:underline">À propos</Link></li>
+            <li><Link href={href("/credits")} className="hover:underline">Crédits photos</Link></li>
           </ul>
         </div>
 
         <div>
-          <h4 className="text-xs font-semibold tracking-label uppercase mb-6">The Brand</h4>
-          <ul className="space-y-4 text-sm text-secondary">
-            <li><Link href="/about" className="hover:underline">About Us</Link></li>
-            <li><Link href="#" className="hover:underline">Sustainability</Link></li>
-            <li><Link href="#" className="hover:underline">Terms of Service</Link></li>
-            <li><Link href="#" className="hover:underline">Privacy Policy</Link></li>
-          </ul>
-        </div>
-
-        <div>
-          <h4 className="text-xs font-semibold tracking-label uppercase mb-6">Payment</h4>
-          <p className="text-sm text-secondary">Cash on delivery — pay when your order arrives.</p>
-          <p className="mt-6 text-xs text-secondary italic">Shipping nationwide via Yalidine — 58 wilayas covered.</p>
+          <h4 className="text-xs font-semibold tracking-label uppercase mb-6 text-on-surface">Livraison et paiement</h4>
+          <p className="text-sm text-secondary">{brand.deliveryPromise}</p>
+          <p className="mt-4 text-sm text-secondary">Vous payez en espèces à la réception de votre commande.</p>
         </div>
       </div>
 
       <div className="px-5 md:px-16 py-6 border-t border-outline-variant flex flex-col md:flex-row justify-between items-center gap-2">
-        <p className="text-[10px] tracking-label text-secondary">© {new Date().getFullYear()} NOIR LUXE. ALL RIGHTS RESERVED.</p>
-        <p className="text-[10px] tracking-label text-secondary">DESIGNED IN ALGIERS</p>
+        <p className="text-[11px] text-secondary">© {new Date().getFullYear()} {brand.name}</p>
+        <p className="text-[11px] text-secondary">
+          Site de démonstration conçu par <a href="https://ahmedouael.com" target="_blank" rel="noopener" className="underline">Willou</a>
+        </p>
       </div>
     </footer>
   );

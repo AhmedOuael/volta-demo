@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/brand/BrandLink";
 import Image from "next/image";
 import type { CatalogProduct } from "@/lib/catalog";
 import { formatDZD } from "@/lib/format";

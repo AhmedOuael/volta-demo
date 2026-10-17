@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import Link from "@/components/brand/BrandLink";
 import { usePathname } from "next/navigation";
+import { stripPreviewPrefix } from "@/lib/brand/routing";
+import { useBrand } from "@/components/brand/BrandProvider";
 import { LayoutDashboard, Menu, Package, ShoppingBag, Users, UserCog, X, LogOut } from "lucide-react";
 
 const NAV = [
@@ -19,7 +21,8 @@ type Props = {
 };
 
 export default function Sidebar({ user, logoutAction }: Props) {
-  const pathname = usePathname();
+  const pathname = stripPreviewPrefix(usePathname());
+  const brand = useBrand();
   const [open, setOpen] = useState(false);
   const items = NAV.filter((item) => !item.adminOnly || user.role === "ADMIN");
 
@@ -45,7 +48,7 @@ export default function Sidebar({ user, logoutAction }: Props) {
   const nav = (
     <nav className="flex flex-col h-full">
       <Link href="/admin" className="flex items-baseline gap-2 px-6 h-16 shrink-0 border-b border-outline-variant">
-        <span className="font-display text-2xl tracking-tighter">NOIR</span>
+        <span className="font-display text-lg font-extrabold truncate">{brand.name}</span>
         <span className="text-xs text-secondary">Admin</span>
       </Link>
       <ul className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
@@ -90,7 +93,7 @@ export default function Sidebar({ user, logoutAction }: Props) {
         <button onClick={() => setOpen(true)} aria-label="Open menu" aria-expanded={open} className="p-2 -ml-2">
           <Menu size={22} />
         </button>
-        <span className="font-display text-xl tracking-tighter">NOIR</span>
+        <span className="font-display text-lg font-extrabold truncate">{brand.name}</span>
         <span className="w-9" aria-hidden="true" />
       </header>
       {open && (

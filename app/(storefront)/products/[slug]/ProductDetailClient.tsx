@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useBrandHref } from "@/components/brand/BrandProvider";
 import type { CatalogProduct, CatalogVariant } from "@/lib/catalog";
 import { useCart } from "@/components/cart/useCart";
 import { ChevronDown } from "lucide-react";
@@ -11,6 +12,7 @@ import { formatDZD } from "@/lib/format";
 export default function ProductDetailClient({ product }: { product: CatalogProduct }) {
   const { addItem } = useCart();
   const router = useRouter();
+  const brandHref = useBrandHref();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [openSection, setOpenSection] = useState<string | null>("details");
   const [added, setAdded] = useState(false);
@@ -84,7 +86,7 @@ export default function ProductDetailClient({ product }: { product: CatalogProdu
           <div className="flex flex-col gap-3 mb-10">
             {/* Buy now orders just this size; the bag is left as it is. */}
             <button
-              onClick={() => selected && router.push(`/checkout/buy/${selected.id}`)}
+              onClick={() => selected && router.push(brandHref(`/checkout/buy/${selected.id}`))}
               disabled={!selected}
               className="w-full bg-primary text-on-primary py-4 rounded-full text-sm font-medium tracking-label uppercase hover:opacity-90 transition-opacity disabled:opacity-40"
             >

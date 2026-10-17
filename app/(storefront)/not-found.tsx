@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/brand/BrandLink";
 
 // Shown inside the shop (with header and footer), e.g. for a product that no longer exists.
 export default function StorefrontNotFound() {

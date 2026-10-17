@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/brand/BrandLink";
 import { Minus, Plus, X } from "lucide-react";
 import { useCart, type CartItem } from "@/components/cart/useCart";
 import { useCartSync } from "@/components/cart/useCartSync";

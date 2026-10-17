@@ -6,7 +6,7 @@ export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "Shop the collection",
-  description: "Hoodies, coats, trousers and accessories from NOIR. Cash on delivery to every wilaya in Algeria.",
+  description: "Caméras, micros, éclairage, informatique et accessoires. Paiement à la livraison partout en Algérie.",
   alternates: { canonical: "/products" },
 };
 

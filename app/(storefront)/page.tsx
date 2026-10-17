@@ -1,115 +1,88 @@
-import Image from "next/image";
-import Link from "next/link";
-import ProductCard from "@/components/ProductCard";
-import NewsletterForm from "@/components/NewsletterForm";
+import Link from "@/components/brand/BrandLink";
+import { Banknote, MessageCircle, ShieldCheck, Truck } from "lucide-react";
 import Hero from "@/components/Hero";
 import ProductRail from "@/components/ProductRail";
 import Reveal from "@/components/motion/Reveal";
 import { getProducts } from "@/lib/catalog";
+import { getBrand } from "@/lib/brand/server";
+import { brandHref } from "@/lib/brand/routing";
 import { SITE, jsonLd } from "@/lib/site";
 
-// Stock/prices change with orders; re-render at most once a minute.
-export const revalidate = 60;
+import { CATEGORIES } from "@/lib/categories";
 
 export default async function HomePage() {
-  // Up to 4 products sit in a grid; more become a horizontal, swipeable row.
+  const brand = await getBrand();
+  const href = (path: string) => brandHref(path, brand.slug);
   const featured = (await getProducts()).slice(0, 12);
-  const curatedHeader = (
-    <div className="flex items-end justify-between gap-6">
-      <div>
-        <h3 className="font-display text-2xl md:text-3xl mb-2">Curated Edit</h3>
-        <p className="text-secondary">Selected essentials for the contemporary wardrobe.</p>
-      </div>
-      <Link href="/products" className="hidden md:flex items-center gap-2 text-xs font-medium tracking-label uppercase hover:gap-4 transition-all whitespace-nowrap">
-        View All Products →
-      </Link>
-    </div>
-  );
+
+  const perks = [
+    { icon: Banknote, title: "Paiement à la livraison", text: "Vous payez en espèces quand le colis arrive." },
+    { icon: Truck, title: "Livraison partout", text: brand.deliveryPromise },
+    { icon: ShieldCheck, title: "Produits garantis", text: "Matériel neuf, testé avant l'envoi." },
+    { icon: MessageCircle, title: "Commande sur WhatsApp", text: "Votre récapitulatif part en un clic." },
+  ];
 
   return (
     <div>
-      {/* Tells search engines who the brand is (name, logo, site) */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={jsonLd({
-          "@context": "https://schema.org",
-          "@type": "ClothingStore",
-          name: SITE.name,
-          url: SITE.url,
-          description: SITE.description,
-          image: `${SITE.url}${SITE.ogImage}`,
-          address: { "@type": "PostalAddress", addressCountry: "DZ" },
-          currenciesAccepted: "DZD",
-          paymentAccepted: "Cash on delivery",
-        })}
-      />
-      <Hero />
+      {brand.visibility === "public" && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={jsonLd({
+            "@context": "https://schema.org",
+            "@type": "Store",
+            name: brand.name,
+            url: SITE.url,
+            description: brand.tagline,
+            address: { "@type": "PostalAddress", addressCountry: "DZ" },
+            currenciesAccepted: "DZD",
+            paymentAccepted: "Paiement à la livraison",
+          })}
+        />
+      )}
+      <Hero brand={brand} />
 
-      {/* Curated edit */}
-      <section className="py-24 md:py-32 px-5 md:px-16">
-        {featured.length > 4 ? (
-          <ProductRail products={featured} label="Curated edit" header={curatedHeader} />
-        ) : (
-          <>
-            <div className="mb-12">{curatedHeader}</div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-              {featured.map((p, i) => (
-                <Reveal key={p.id} delay={i * 120}>
-                  <ProductCard product={p} />
-                </Reveal>
-              ))}
-            </div>
-          </>
-        )}
-        <Link href="/products" className="md:hidden mt-10 flex items-center justify-center gap-2 text-xs font-medium tracking-label uppercase">
-          View All Products →
-        </Link>
-      </section>
-
-      {/* Brand ethos */}
-      <section className="py-24 md:py-32 px-5 md:px-16 bg-surface-container-low">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-          <Reveal>
-            <span className="text-xs font-medium tracking-label uppercase text-secondary block mb-6">Our Ethos</span>
-            <h2 className="font-display text-3xl md:text-5xl mb-8 leading-tight">
-              SUSTAINABLE SOPHISTICATION
-            </h2>
-            <div className="space-y-6 text-lg text-on-surface-variant max-w-lg">
-              <p>
-                At NOIR, we believe that the true essence of luxury lies in longevity. Our garments are
-                investments in structural design and ethical craftsmanship, not seasonal trends.
-              </p>
-              <p>
-                Every piece is sourced from sustainable mills in North Africa and assembled with meticulous
-                attention to detail — durability over speed.
-              </p>
-              <p className="italic font-display text-primary text-xl">— Excellence in every thread.</p>
-            </div>
-            <Link href="/about" className="inline-block mt-12 border-b-2 border-primary pb-1 text-sm font-medium tracking-label uppercase hover:text-secondary hover:border-secondary transition-all">
-              Read the Full Manifesto
+      <section className="px-5 md:px-16 py-12 md:py-16">
+        <h2 className="font-display text-xl md:text-2xl font-bold mb-6">Catégories</h2>
+        <div className="flex flex-wrap gap-3">
+          {CATEGORIES.map((c) => (
+            <Link
+              key={c}
+              href={href(`/products?cat=${encodeURIComponent(c)}`)}
+              className="rounded-full border border-outline-variant px-5 py-2.5 text-sm font-medium hover:border-primary hover:bg-surface-container transition-colors"
+            >
+              {c}
             </Link>
-          </Reveal>
-          <Reveal delay={150} className="aspect-4/5 overflow-hidden">
-            <Image
-              src="/images/product1.jpg"
-              alt="Designer portrait in the atelier"
-              width={800}
-              height={1000}
-              className="w-full h-full object-cover"
-            />
-          </Reveal>
+          ))}
         </div>
       </section>
 
-      {/* Newsletter */}
-      <section className="py-24 md:py-32 px-5 md:px-16 text-center bg-primary text-on-primary">
-        <Reveal className="max-w-2xl mx-auto">
-          <h2 className="font-display text-3xl md:text-4xl mb-4">JOIN THE INNER CIRCLE</h2>
-          <p className="text-white/60 mb-10">
-            Subscribe to receive early access to new drops and exclusive archival releases.
-          </p>
-          <NewsletterForm />
-        </Reveal>
+      <section className="px-5 md:px-16 pb-16 md:pb-24">
+        <ProductRail
+          products={featured}
+          label="Nouveautés"
+          header={
+            <div className="flex items-end justify-between gap-6">
+              <h2 className="font-display text-xl md:text-2xl font-bold">Nouveautés</h2>
+              <Link href={href("/products")} className="text-xs font-semibold tracking-label uppercase whitespace-nowrap hover:underline">
+                Tout voir →
+              </Link>
+            </div>
+          }
+        />
+      </section>
+
+      <section className="px-5 md:px-16 py-16 bg-surface-container">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {perks.map(({ icon: Icon, title, text }, i) => (
+            <Reveal key={title} delay={i * 100} className="flex gap-4">
+              <Icon size={28} className="text-accent shrink-0" aria-hidden="true" />
+              <div>
+                <h3 className="font-semibold mb-1">{title}</h3>
+                <p className="text-sm text-secondary">{text}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
       </section>
     </div>
   );

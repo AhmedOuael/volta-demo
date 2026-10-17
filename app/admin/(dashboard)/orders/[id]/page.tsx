@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/brand/BrandLink";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth/session";
 import { getOrderDetail } from "@/lib/admin/orders";

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/brand/BrandLink";
 import Image from "next/image";
 import { Plus } from "lucide-react";
 import { requireUser } from "@/lib/auth/session";
