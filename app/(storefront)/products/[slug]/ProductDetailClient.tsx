@@ -57,9 +57,9 @@ export default function ProductDetailClient({ product }: { product: CatalogProdu
 
   return (
     <div className="px-5 md:px-16 py-12">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-start">
         {/* Gallery */}
-        <div className="aspect-square bg-surface-container overflow-hidden relative">
+        <div className="aspect-square bg-surface-container overflow-hidden relative rounded-lg">
           {product.image ? (
             <Image src={product.image} alt={product.name} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" priority />
           ) : (
@@ -70,7 +70,8 @@ export default function ProductDetailClient({ product }: { product: CatalogProdu
         </div>
 
         {/* Info */}
-        <div className="md:pt-4">
+        {/* The buy box stays in view while the photo column scrolls (desktop). */}
+        <div className="md:sticky md:top-32 md:pt-2">
           <p className="text-xs tracking-label uppercase text-secondary mb-3">
             {[product.categories.join(", "), selected && `Réf. ${selected.sku}`].filter(Boolean).join(" · ")}
           </p>
@@ -97,7 +98,7 @@ export default function ProductDetailClient({ product }: { product: CatalogProdu
                 disabled={v.available === 0}
                 title={v.available === 0 ? "Rupture" : undefined}
                 onClick={() => setSelectedId(v.id)}
-                className={`min-h-12 px-4 py-2 flex flex-col items-start justify-center border text-sm text-left transition-colors
+                className={`min-h-12 px-4 py-2 flex flex-col items-start justify-center rounded-sm border text-sm text-left transition-colors
                   ${v.available === 0 ? "border-outline-variant text-outline-variant line-through cursor-not-allowed" : "border-outline-variant hover:border-primary"}
                   ${selectedId === v.id ? "bg-primary text-on-primary border-primary" : ""}`}
               >
