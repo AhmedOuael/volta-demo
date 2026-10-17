@@ -1,7 +1,7 @@
 import { IMAGE_BASE_URL, REMOTE_IMAGE_HOSTS } from "./image-hosts";
 
 // How stored image values resolve:
-//   "/images/hero.jpg"            a file in /public (leading slash)
+//   "/catalog/hero-studio.jpg"     a file in /public (leading slash)
 //   "products/hoodie/8f3a.jpg"    a key in Cloudflare R2, served from NEXT_PUBLIC_IMAGE_BASE_URL
 //   "https://host/x.jpg"          a full URL, only from hosts next/image allows
 // Anything else returns null so the UI shows its placeholder instead of breaking.

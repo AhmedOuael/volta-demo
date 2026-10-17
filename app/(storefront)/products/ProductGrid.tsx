@@ -45,7 +45,7 @@ export default function ProductGrid({
         ))}
       </div>
 
-      <p className="text-sm text-secondary mb-8">Showing {filtered.length} of {products.length} items.</p>
+      <p className="text-sm text-secondary mb-8">{filtered.length} produit{filtered.length === 1 ? "" : "s"} sur {products.length}</p>
 
       <div key={active} className="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
         {filtered.map((p, i) =>

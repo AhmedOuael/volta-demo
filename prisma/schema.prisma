@@ -39,6 +39,8 @@ model Product {
   id          BigInt            @id @default(autoincrement())
   slug        String            @unique
   name        String
+  maker       String            @default("") // manufacturer shown to shoppers, never a store brand
+  specs       Json              @default("[]") // [{ label, value }], read with lib/specs.ts
   description String?
   details     String[]          @default([])
   limited     Boolean           @default(false)
@@ -48,6 +50,8 @@ model Product {
   categories  ProductCategory[]
   images      ProductImage[]
   variants    ProductVariant[]
+
+  @@index([maker])
 }
 
 model Category {
@@ -155,6 +159,7 @@ model Order {
   discount      Decimal              @default(0) @db.Decimal(10, 2)
   total         Decimal              @db.Decimal(10, 2)
   status        String               @default("NEW")
+  storeSlug     String               @default("volta") // brand the order was placed on
   createdAt     DateTime             @default(now()) @db.Timestamptz(3)
   updatedAt     DateTime             @updatedAt @db.Timestamptz(3)
   customer      Customer             @relation(fields: [customerId], references: [id])
@@ -169,6 +174,7 @@ model Order {
   @@index([status])
   @@index([createdAt])
   @@index([status, createdAt])
+  @@index([storeSlug, createdAt])
 }
 
 model OrderItem {
