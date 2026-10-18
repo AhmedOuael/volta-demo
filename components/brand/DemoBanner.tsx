@@ -8,7 +8,7 @@ export default function DemoBanner({ brand }: { brand: Brand }) {
     <p
       role="note"
       className={`text-center text-[11px] md:text-xs leading-snug px-4 py-2 ${
-        isPrivate ? "bg-accent text-black font-semibold" : "bg-surface-container text-on-surface-variant"
+        isPrivate ? "bg-accent text-on-accent font-semibold" : "bg-surface-container text-on-surface-variant"
       }`}
     >
       {bannerText(brand)}

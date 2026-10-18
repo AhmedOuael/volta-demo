@@ -12,3 +12,8 @@ export function contrastRatio(hexA: string, hexB: string): number {
   const [a, b] = [luminance(hexA), luminance(hexB)];
   return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
 }
+
+/** Black or white, whichever reads better on `hex` (text on an accent-coloured bar). */
+export function inkOn(hex: string): "#000000" | "#ffffff" {
+  return contrastRatio("#000000", hex) >= contrastRatio("#ffffff", hex) ? "#000000" : "#ffffff";
+}

@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { DEFAULT_BRAND_SLUG, getBrandBySlug, getDefaultBrand, listBrands } from "@/brands";
-import { contrastRatio } from "@/lib/brand/contrast";
+import { contrastRatio, inkOn } from "@/lib/brand/contrast";
 
 describe("contrastRatio", () => {
   it("is 21 for black on white", () => {
@@ -15,6 +15,13 @@ describe("contrastRatio", () => {
 
   it("is symmetric", () => {
     expect(contrastRatio("#183048", "#ffffff")).toBeCloseTo(contrastRatio("#ffffff", "#183048"), 6);
+  });
+});
+
+describe("inkOn", () => {
+  it("picks black on a light colour and white on a dark one", () => {
+    expect(inkOn("#f07818")).toBe("#000000");
+    expect(inkOn("#111111")).toBe("#ffffff");
   });
 });
 
@@ -45,6 +52,10 @@ describe("brand files", () => {
     expect(contrastRatio(b.colors.text, b.colors.background)).toBeGreaterThanOrEqual(4.5);
     expect(contrastRatio(b.colors.text, b.colors.surface)).toBeGreaterThanOrEqual(4.5);
     expect(contrastRatio(b.colors.onPrimary, b.colors.primary)).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it.each(brands.map((b) => [b.slug, b] as const))("%s demo banner text is readable on its accent", (_slug, b) => {
+    expect(contrastRatio(inkOn(b.colors.accent), b.colors.accent)).toBeGreaterThanOrEqual(4.5);
   });
 
   it.each(brands.map((b) => [b.slug, b] as const))("%s logo file exists", (_slug, b) => {

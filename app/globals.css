@@ -32,6 +32,7 @@
   --color-outline-variant: #c4c7c7;
 
   --color-accent: #7a8271; /* muted green - key actions / success */
+  --color-on-accent: #000000; /* text on accent, set per brand (lib/brand/theme.ts) */
   --color-beige: #d9d0c1; /* warm beige - seasonal accents */
 
   --color-error: #ba1a1a;

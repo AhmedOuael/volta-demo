@@ -1,4 +1,5 @@
 import type { Brand } from "@/brands";
+import { inkOn } from "./contrast";
 
 const mix = (a: string, b: string, pctA: number) => `color-mix(in srgb, ${a} ${pctA}%, ${b})`;
 
@@ -14,6 +15,7 @@ export function brandCssVars(brand: Brand): Record<string, string> {
     "--color-secondary": muted,
     "--color-on-secondary": background,
     "--color-accent": accent,
+    "--color-on-accent": inkOn(accent),
     "--color-background": background,
     "--color-surface": background,
     "--color-surface-bright": background,

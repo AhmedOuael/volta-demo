@@ -42,3 +42,14 @@ site and set the environment variable `NEXT_PUBLIC_DEFAULT_BRAND=<slug>` before 
 needs a redeploy). That store then opens at the bare address, `/p/<slug>` links keep working, Volta and
 every other brand return 404, and the whole site is noindex (robots.txt disallows everything, empty
 sitemap). A slug that isn't in `brands/index.ts` fails the build.
+
+## The shared preview site (many stores, one site)
+
+A Netlify site with `NEXT_PUBLIC_PREVIEWS_ONLY=true` serves only `/p/<slug>` for private stores. The
+bare address, every page outside `/p/`, Volta (`/p/volta`) and unknown slugs answer a plain
+"Page introuvable" 404 that names no store, and the whole site is noindex. Add new stores here: one
+brand file each, then one push for all of them (every push redeploys every Netlify site linked to
+the repo, 15 credits each).
+
+The demo banner's text colour is chosen per store (black or white, whichever reads better on the
+accent colour); `npm test` fails if a store's banner, text or buttons would be hard to read.
