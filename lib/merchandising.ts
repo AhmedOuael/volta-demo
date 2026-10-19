@@ -33,3 +33,12 @@ export function productsForTab(products: CatalogProduct[], tab: HomeTab, count: 
   const sorted = [...inStock].sort((a, b) => (tab === "budget" ? a.price - b.price : b.price - a.price));
   return sorted.slice(0, count);
 }
+
+export type CardAction = { kind: "add"; variant: CatalogProduct["variants"][number] } | { kind: "choose" } | { kind: "out" };
+
+/** What the card's cart button does: add the only orderable version, open the quick view to choose, or nothing. */
+export function cardAction(product: CatalogProduct): CardAction {
+  const orderable = product.variants.filter((v) => v.available > 0);
+  if (orderable.length === 0) return { kind: "out" };
+  return orderable.length === 1 ? { kind: "add", variant: orderable[0] } : { kind: "choose" };
+}

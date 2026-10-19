@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cardBadge, priceLabel, productsForTab } from "@/lib/merchandising";
+import { cardAction, cardBadge, priceLabel, productsForTab } from "@/lib/merchandising";
 import type { CatalogProduct } from "@/lib/catalog";
 
 function product(id: string, prices: number[], available: number[] = prices.map(() => 5)): CatalogProduct {
@@ -67,5 +67,25 @@ describe("productsForTab", () => {
   it("does not reorder the list it was given", () => {
     productsForTab(items, "budget", 3);
     expect(items.map((p) => p.id)).toEqual(["a", "b", "c", "d"]);
+  });
+});
+
+describe("cardAction", () => {
+  it("adds a one-version product straight to the cart", () => {
+    const p = product("a", [1000]);
+    expect(cardAction(p)).toEqual({ kind: "add", variant: p.variants[0] });
+  });
+
+  it("asks to choose when several versions can be ordered", () => {
+    expect(cardAction(product("a", [1000, 2000]))).toEqual({ kind: "choose" });
+  });
+
+  it("adds the only version still in stock", () => {
+    const p = product("a", [1000, 2000], [0, 3]);
+    expect(cardAction(p)).toEqual({ kind: "add", variant: p.variants[1] });
+  });
+
+  it("offers nothing when every version is sold out", () => {
+    expect(cardAction(product("a", [1000, 2000], [0, 0]))).toEqual({ kind: "out" });
   });
 });

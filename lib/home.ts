@@ -25,3 +25,31 @@ export const SPOTLIGHTS: Spotlight[] = [
   { slug: "aerix-one-4k", title: "Aerix One 4K", tagline: "Étanche sans caisson, stabilisée, prête pour le voyage" },
   { slug: "vektor-curve-34", title: "Vektor Curve 34\"", tagline: "Toute votre timeline de montage, d'un seul regard" },
 ];
+
+/** The wide "product of the moment" band. */
+export const PROMO: HeroSlide = {
+  slug: "lumex-cob-300",
+  kicker: "Produit du moment",
+  title: "Lumex COB 300",
+  tagline: "300 W de lumière douce pour le studio et le fond vert, boîte à lumière incluse",
+};
+
+/** One swipeable row per category, in this order. */
+export const CATEGORY_RAILS: CategoryName[] = ["Caméras", "Micros", "Éclairage"];
+
+export type HomeStat = { value: number; label: string };
+
+const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
+
+/** The count-up strip. Only real numbers: the catalogue and the wilayas with a delivery fee. */
+export function homeStats(products: { maker: string; categories: string[] }[], wilayas: number): HomeStat[] {
+  const makers = new Set(products.map((p) => p.maker)).size;
+  const categories = new Set(products.flatMap((p) => p.categories)).size;
+  const stats = [
+    { value: products.length, label: plural(products.length, "produit", "produits") },
+    { value: makers, label: plural(makers, "marque", "marques") },
+    { value: categories, label: plural(categories, "catégorie", "catégories") },
+  ];
+  if (wilayas > 0) stats.push({ value: wilayas, label: plural(wilayas, "wilaya livrée", "wilayas livrées") });
+  return stats;
+}

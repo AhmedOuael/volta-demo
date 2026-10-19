@@ -80,7 +80,7 @@ export default function ProductRail({ products, label, header }: { products: Cat
   return (
     <div>
       {/* Section header with the arrows on the same line (arrows are desktop-only; touch swipes) */}
-      <div className="flex items-end justify-between gap-6 mb-12">
+      <div className="flex items-end justify-between gap-6 mb-8">
         <div className="flex-1 min-w-0">{header}</div>
         <div className="hidden md:flex gap-2 shrink-0">
           <button type="button" onClick={() => page(-1)} disabled={atStart} aria-label="Produits précédents" className={arrow}>

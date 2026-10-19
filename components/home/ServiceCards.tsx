@@ -1,3 +1,5 @@
+import Reveal from "@/components/motion/Reveal";
+import RevealWords from "@/components/motion/RevealWords";
 import { Banknote, MessageCircle, ShieldCheck, Truck, type LucideIcon } from "lucide-react";
 
 /** "Acheter en toute sérénité": four bordered cards, icon top-right. */
@@ -10,14 +12,16 @@ export default function ServiceCards({ deliveryPromise }: { deliveryPromise: str
   ];
   return (
     <div>
-      <h2 className="font-display text-2xl md:text-3xl font-bold mb-8">Acheter en toute sérénité</h2>
+      <RevealWords text="Acheter en toute sérénité" className="font-display text-2xl md:text-3xl font-bold mb-8" />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {cards.map(({ icon: Icon, title, text }) => (
-          <div key={title} className="relative rounded-md border border-outline-variant p-6 pr-14 min-h-36">
+        {cards.map(({ icon: Icon, title, text }, i) => (
+          <Reveal key={title} delay={i * 70} className="h-full">
+          <div data-spotlight className="h-full rounded-md border border-outline-variant p-6 pr-14 min-h-36 transition-colors hover:border-primary">
             <Icon size={26} className="absolute top-6 right-6 text-accent" aria-hidden="true" />
             <h3 className="font-semibold text-lg">{title}</h3>
             <p className="mt-3 text-sm text-secondary">{text}</p>
           </div>
+          </Reveal>
         ))}
       </div>
     </div>

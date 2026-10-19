@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, ViewTransition } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useBrandHref } from "@/components/brand/BrandProvider";
@@ -10,6 +10,7 @@ import { ChevronDown } from "lucide-react";
 import { formatDZD } from "@/lib/format";
 import { stockBadge, type StockBadge } from "@/lib/stock";
 import SpecsTable from "@/components/product/SpecsTable";
+import { productPhotoTransition } from "@/components/ProductCard";
 
 const DOT: Record<StockBadge["tone"], string> = { ok: "bg-emerald-500", low: "bg-amber-500", out: "bg-red-500" };
 
@@ -61,7 +62,9 @@ export default function ProductDetailClient({ product }: { product: CatalogProdu
         {/* Gallery */}
         <div className="aspect-square bg-surface-container overflow-hidden relative rounded-lg">
           {product.image ? (
-            <Image src={product.image} alt={product.name} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" priority />
+            <ViewTransition name={productPhotoTransition(product.slug)} share="morph" default="none">
+              <Image src={product.image} alt={product.name} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" priority />
+            </ViewTransition>
           ) : (
             <div className="w-full h-full flex items-center justify-center text-secondary text-sm tracking-label uppercase">
               {product.name}

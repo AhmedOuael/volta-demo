@@ -45,6 +45,23 @@ for (const { base, name } of BRANDS) {
       await expect(page.getByRole("link", { name: /Vektor Book 14/ })).toBeVisible();
     });
 
+    test("header search suggests products while typing", async ({ page }) => {
+      await page.goto(`${base}/`);
+      await page.getByRole("button", { name: "Rechercher", exact: true }).click();
+      await page.getByRole("combobox", { name: "Rechercher dans la boutique" }).fill("cob");
+      await page.getByRole("option", { name: /Lumex COB 300/ }).click();
+      await expect(page).toHaveURL(`${base}/products/lumex-cob-300`);
+    });
+
+    test("quick view adds a product to the cart without leaving the page", async ({ page }) => {
+      await page.goto(`${base}/products?q=sonora+dyn`);
+      await page.getByRole("button", { name: "Aperçu rapide de Sonora Dyn 58" }).click();
+      const dialog = page.getByRole("dialog", { name: "Sonora Dyn 58" });
+      await dialog.getByRole("button", { name: "Ajouter au panier" }).click();
+      await expect(dialog.getByRole("link", { name: "Voir le panier" })).toBeVisible();
+      await expect(page).toHaveURL(new RegExp(`${base}/products\\?q=`));
+    });
+
     test("'En stock uniquement' hides a sold-out product", async ({ page }) => {
       await page.goto(`${base}/products?cat=Micros`);
       await expect(page.getByRole("link", { name: /Sonora Podcast D7/ })).toBeVisible();
