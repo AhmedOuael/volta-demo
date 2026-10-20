@@ -4,12 +4,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import ProductCard from "./ProductCard";
 import Reveal from "./motion/Reveal";
-import type { CatalogProduct } from "@/lib/catalog";
+import type { CardProduct } from "@/lib/merchandising";
 
 // Horizontal product row: native overflow scrolling with snap points, so touch
 // swiping is the browser's own (fastest possible); arrows and mouse-drag are
 // added for desktop. No carousel library.
-export default function ProductRail({ products, label, header }: { products: CatalogProduct[]; label: string; header?: React.ReactNode }) {
+export default function ProductRail({ products, label, header }: { products: CardProduct[]; label: string; header?: React.ReactNode }) {
   const rail = useRef<HTMLUListElement>(null);
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(false);
@@ -25,12 +25,14 @@ export default function ProductRail({ products, label, header }: { products: Cat
   useEffect(() => {
     const el = rail.current;
     if (!el) return;
-    updateEnds();
+    // The first check runs in the ResizeObserver callback, after layout, so
+    // reading the scroll sizes doesn't force an extra layout during page load.
+    const ro = new ResizeObserver(updateEnds);
+    ro.observe(el);
     el.addEventListener("scroll", updateEnds, { passive: true });
-    window.addEventListener("resize", updateEnds);
     return () => {
+      ro.disconnect();
       el.removeEventListener("scroll", updateEnds);
-      window.removeEventListener("resize", updateEnds);
     };
   }, [updateEnds]);
 

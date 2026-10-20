@@ -6,13 +6,12 @@ import ProductCard from "@/components/ProductCard";
 import Reveal from "@/components/motion/Reveal";
 import RevealWords from "@/components/motion/RevealWords";
 import { useBrandHref } from "@/components/brand/BrandProvider";
-import type { CatalogProduct } from "@/lib/catalog";
-import { HOME_TABS, productsForTab, type HomeTab } from "@/lib/merchandising";
+import { HOME_TABS, productsForTab, type CardProduct, type HomeTab } from "@/lib/merchandising";
 
 const COUNT = 8;
 
 /** "Nos meilleurs choix": the same products re-sorted per tab (newest, cheapest, premium). */
-export default function ProductTabs({ products }: { products: CatalogProduct[] }) {
+export default function ProductTabs({ products }: { products: CardProduct[] }) {
   const href = useBrandHref();
   const [tab, setTab] = useState<HomeTab>("new");
   // After a tab switch the new cards rise in (the first set reveals on scroll).

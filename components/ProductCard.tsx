@@ -6,8 +6,7 @@ import Image from "next/image";
 import { Check, Eye, ShoppingBag } from "lucide-react";
 import QuickView from "@/components/QuickView";
 import { useCart } from "@/components/cart/useCart";
-import type { CatalogProduct } from "@/lib/catalog";
-import { cardAction, cardBadge, priceLabel, type CardBadge } from "@/lib/merchandising";
+import { cardAction, cardBadge, priceLabel, type CardBadge, type CardProduct } from "@/lib/merchandising";
 
 const BADGE: Record<CardBadge["tone"], string> = {
   out: "bg-zinc-800 text-white",
@@ -23,7 +22,7 @@ export const productPhotoTransition = (slug: string) => `product-photo-${slug}`;
  * Quick actions over the photo: add to cart (or choose a version) and quick view.
  * They slide up on hover with a mouse and are always shown as icons on touch screens.
  */
-export default function ProductCard({ product, isNew = false }: { product: CatalogProduct; isNew?: boolean }) {
+export default function ProductCard({ product, isNew = false }: { product: CardProduct; isNew?: boolean }) {
   const badge = cardBadge(product, isNew);
   const action = cardAction(product);
   const { addItem } = useCart();

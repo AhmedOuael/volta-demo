@@ -12,12 +12,23 @@ export default function MotionEffects() {
 
   useEffect(() => {
     let ticking = false;
+    let scrolled: boolean | null = null;
     const update = () => {
       ticking = false;
       const y = window.scrollY;
-      document.documentElement.dataset.scrolled = String(y > 24);
+      if (scrolled !== y > 24) {
+        scrolled = y > 24;
+        document.documentElement.dataset.scrolled = String(scrolled);
+      }
+      if (!bar.current) return;
+      // At the top the answer is 0: skip reading scrollHeight, which would force
+      // a full-page layout while the page is still loading.
+      if (y === 0) {
+        bar.current.style.scale = "0 1";
+        return;
+      }
       const max = document.documentElement.scrollHeight - window.innerHeight;
-      if (bar.current) bar.current.style.scale = `${max > 0 ? Math.min(y / max, 1) : 0} 1`;
+      bar.current.style.scale = `${max > 0 ? Math.min(y / max, 1) : 0} 1`;
     };
     const onScroll = () => {
       if (ticking) return;

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cardAction, cardBadge, priceLabel, productsForTab } from "@/lib/merchandising";
+import { cardAction, cardBadge, priceLabel, productsForTab, toCardProduct } from "@/lib/merchandising";
 import type { CatalogProduct } from "@/lib/catalog";
 
 function product(id: string, prices: number[], available: number[] = prices.map(() => 5)): CatalogProduct {
@@ -87,5 +87,13 @@ describe("cardAction", () => {
 
   it("offers nothing when every version is sold out", () => {
     expect(cardAction(product("a", [1000, 2000], [0, 0]))).toEqual({ kind: "out" });
+  });
+});
+
+describe("toCardProduct", () => {
+  it("keeps what a card and the quick view show, and nothing else", () => {
+    const full = { ...product("a", [1000, 2000]), specs: [{ label: "Poids", value: "1 kg" }], details: ["x"], gallery: ["/b.jpg"], description: "Court" };
+    expect(Object.keys(toCardProduct(full)).sort()).toEqual(["description", "id", "image", "maker", "name", "price", "slug", "variants"]);
+    expect(toCardProduct(full).variants).toEqual(full.variants);
   });
 });

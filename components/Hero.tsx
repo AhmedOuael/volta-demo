@@ -85,7 +85,7 @@ export default function Hero({ slides }: { slides: HeroSlideData[] }) {
               </div>
               {s.image && (
                 <div className={`${on ? "hero-photo" : ""} relative mx-auto mt-8 w-full max-w-2xl aspect-16/9 overflow-hidden rounded-lg shadow-xl shadow-black/10`}>
-                  <Image src={s.image} alt={s.title} fill preload={i === 0} sizes="(max-width: 768px) 100vw, 768px" className="object-cover" />
+                  <Image src={s.image} alt={s.title} fill loading={i === 0 ? "eager" : "lazy"} fetchPriority={i === 0 ? "high" : "auto"} sizes="(max-width: 768px) 100vw, 768px" className="object-cover" />
                 </div>
               )}
             </div>

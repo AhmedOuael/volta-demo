@@ -31,6 +31,11 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  experimental: {
+    // The stylesheet (Tailwind, ~14 KB) arrives inside the HTML instead of as a
+    // separate, render-blocking request: first paint no longer waits for it.
+    inlineCss: true,
+  },
   images: {
     // Kept in sync with imageUrl() via lib/image-hosts.ts.
     remotePatterns: REMOTE_IMAGE_HOSTS.map((hostname) => ({ protocol: "https" as const, hostname })),

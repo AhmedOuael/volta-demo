@@ -7,22 +7,34 @@ import { useEffect, useRef, type ElementType, type ReactNode, type RefObject } f
 // the server renders everything visible; only elements that are still below
 // the fold when the page loads get hidden, so there is no flash, nothing is
 // lost without JavaScript, and above-the-fold content (LCP) is never delayed.
+//
+// Where an element is comes from the observer's first report, never from
+// measuring it (getBoundingClientRect): measuring dozens of elements while
+// hiding others forced the browser to redo the page layout each time.
 
 type RevealAttr = "reveal" | "words";
 
+const attrOf = new WeakMap<Element, RevealAttr>();
+const seen = new WeakSet<Element>();
+
 let observer: IntersectionObserver | null = null;
 function getObserver() {
-  observer ??= new IntersectionObserver(
-    (entries) => {
-      for (const entry of entries) {
-        if (!entry.isIntersecting) continue;
-        const el = entry.target as HTMLElement;
-        for (const attr of ["reveal", "words"] as const) if (el.dataset[attr] === "hidden") el.dataset[attr] = "shown";
+  observer ??= new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      const el = entry.target as HTMLElement;
+      const attr = attrOf.get(el) ?? "reveal";
+      if (!seen.has(el)) {
+        // First report, right after the first layout: on screen stays as it is,
+        // below the fold is hidden until it scrolls in.
+        seen.add(el);
+        if (entry.isIntersecting) observer!.unobserve(el);
+        else el.dataset[attr] = "hidden";
+      } else if (entry.isIntersecting) {
+        el.dataset[attr] = "shown";
         observer!.unobserve(el);
       }
-    },
-    { rootMargin: "0px 0px -8% 0px", threshold: 0 }
-  );
+    }
+  });
   return observer;
 }
 
@@ -31,9 +43,7 @@ export function useReveal(ref: RefObject<HTMLElement | null>, attr: RevealAttr =
   useEffect(() => {
     const el = ref.current;
     if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const box = el.getBoundingClientRect();
-    if (box.top < window.innerHeight && box.bottom > 0) return; // already on screen: leave it be
-    el.dataset[attr] = "hidden";
+    attrOf.set(el, attr);
     const io = getObserver();
     io.observe(el);
     return () => io.unobserve(el);

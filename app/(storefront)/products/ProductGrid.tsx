@@ -3,14 +3,14 @@
 import ProductCard from "@/components/ProductCard";
 import Reveal from "@/components/motion/Reveal";
 import { useBrandHref } from "@/components/brand/BrandProvider";
-import type { CatalogProduct } from "@/lib/catalog";
+import type { CardProduct } from "@/lib/merchandising";
 
 // The first cards rise in with CSS from the first frame (they're on screen at
 // load); the rest fade in as they're scrolled to.
 const ENTRANCE_COUNT = 6;
 const STAGGER_MS = 90;
 
-export default function ProductGrid({ products, total }: { products: CatalogProduct[]; total: number }) {
+export default function ProductGrid({ products, total }: { products: CardProduct[]; total: number }) {
   const href = useBrandHref();
 
   if (products.length === 0) {

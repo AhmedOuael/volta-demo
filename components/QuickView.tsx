@@ -6,7 +6,8 @@ import { X } from "lucide-react";
 import { useLenis } from "lenis/react";
 import Link from "@/components/brand/BrandLink";
 import { useCart } from "@/components/cart/useCart";
-import type { CatalogProduct, CatalogVariant } from "@/lib/catalog";
+import type { CatalogVariant } from "@/lib/catalog";
+import type { CardProduct } from "@/lib/merchandising";
 import { formatDZD } from "@/lib/format";
 import { stockBadge, type StockBadge } from "@/lib/stock";
 
@@ -14,7 +15,7 @@ const DOT: Record<StockBadge["tone"], string> = { ok: "bg-emerald-500", low: "bg
 const CLOSE_MS = 300; // matches .quick-view's transition in globals.css
 
 /** The product in a pop-up: photo, versions, stock, add to cart, without leaving the page. */
-export default function QuickView({ product, onClose }: { product: CatalogProduct; onClose: () => void }) {
+export default function QuickView({ product, onClose }: { product: CardProduct; onClose: () => void }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const lenis = useLenis();
   const { addItem } = useCart();

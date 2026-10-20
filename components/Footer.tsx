@@ -21,7 +21,7 @@ export default function Footer() {
         </div>
 
         <div>
-          <h4 className="text-xs font-semibold tracking-label uppercase mb-6 text-on-surface">Service client</h4>
+          <h3 className="text-xs font-semibold tracking-label uppercase mb-6 text-on-surface">Service client</h3>
           <ul className="space-y-4 text-sm text-secondary">
             <li><Link href={href("/products")} className="hover:underline">Boutique</Link></li>
             <li><Link href={href("/contact")} className="hover:underline">Nous contacter</Link></li>
@@ -31,7 +31,7 @@ export default function Footer() {
         </div>
 
         <div>
-          <h4 className="text-xs font-semibold tracking-label uppercase mb-6 text-on-surface">Livraison et paiement</h4>
+          <h3 className="text-xs font-semibold tracking-label uppercase mb-6 text-on-surface">Livraison et paiement</h3>
           <p className="text-sm text-secondary">{brand.deliveryPromise}</p>
           <p className="mt-4 text-sm text-secondary">Vous payez en espèces à la réception de votre commande.</p>
         </div>

@@ -16,7 +16,7 @@ import { getBrand } from "@/lib/brand/server";
 import { brandHref } from "@/lib/brand/routing";
 import { CATEGORIES } from "@/lib/categories";
 import { CATEGORY_RAILS, CATEGORY_TILES, HERO_SLIDES, PROMO, SPOTLIGHTS, homeStats } from "@/lib/home";
-import { priceLabel } from "@/lib/merchandising";
+import { priceLabel, toCardProduct } from "@/lib/merchandising";
 import { SITE, jsonLd } from "@/lib/site";
 
 export default async function HomePage() {
@@ -41,10 +41,11 @@ export default async function HomePage() {
     return p ? [{ title: s.title, tagline: s.tagline, href: href(`/products/${s.slug}`), image: p.image }] : [];
   });
 
+  const cards = products.map(toCardProduct);
   const promoProduct = bySlug.get(PROMO.slug);
   const promo = promoProduct && { ...PROMO, price: priceLabel(promoProduct), href: href(`/products/${PROMO.slug}`), image: promoProduct.image };
   const makers = [...new Set(products.map((p) => p.maker))].sort((a, b) => a.localeCompare(b));
-  const rails = CATEGORY_RAILS.map((c) => ({ name: c, products: products.filter((p) => p.categories.includes(c)).slice(0, 8) })).filter((r) => r.products.length > 0);
+  const rails = CATEGORY_RAILS.map((c) => ({ name: c, products: products.filter((p) => p.categories.includes(c)).slice(0, 8).map(toCardProduct) })).filter((r) => r.products.length > 0);
 
   return (
     <div>
@@ -84,7 +85,7 @@ export default async function HomePage() {
       </section>
 
       <section className="px-5 md:px-16 pt-16 md:pt-24">
-        <ProductTabs products={products} />
+        <ProductTabs products={cards} />
       </section>
 
       {promo && (

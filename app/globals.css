@@ -1,11 +1,10 @@
 @import "tailwindcss";
-@import "@fontsource/playfair-display/400.css";
-@import "@fontsource/playfair-display/700.css";
-@import "@fontsource/playfair-display/700-italic.css";
-@import "@fontsource/inter/400.css";
-@import "@fontsource/inter/500.css";
-@import "@fontsource/inter/600.css";
-@import "@fontsource/inter/700.css";
+/* Every store uses Inter (brands/*.ts). Latin subset only: it covers French
+   (é, ç, œ, « », €); the full packages added 120 @font-face rules to the CSS. */
+@import "@fontsource/inter/latin-400.css";
+@import "@fontsource/inter/latin-500.css";
+@import "@fontsource/inter/latin-600.css";
+@import "@fontsource/inter/latin-700.css";
 
 @theme {
   /* --- NOIR LUXE design tokens (from Stitch DESIGN.md / stitch pages) --- */
@@ -82,7 +81,7 @@
   --color-ink-panel: #1a1a1a;
   --color-ink-border: #2e2e2e;
 
-  --font-display: "Playfair Display", Georgia, serif;
+  --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
 
   --radius-none: 0px;

@@ -3,6 +3,7 @@ import FilterSheet from "@/components/catalog/FilterSheet";
 import { getCategories, getMakers, getProducts } from "@/lib/catalog";
 import { parseFilters } from "@/lib/catalog-filters";
 import ProductGrid from "./ProductGrid";
+import { toCardProduct } from "@/lib/merchandising";
 
 export const metadata: Metadata = {
   title: "Boutique",
@@ -22,7 +23,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
       </div>
 
       <FilterSheet filters={filters} categories={categories} makers={makers}>
-        <ProductGrid products={products} total={all.length} />
+        <ProductGrid products={products.map(toCardProduct)} total={all.length} />
       </FilterSheet>
     </div>
   );
