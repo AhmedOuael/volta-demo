@@ -1,6 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
+import { CATALOG_TAG } from "@/lib/catalog";
 import { requireUser } from "@/lib/auth/session";
 import { assertCanWrite } from "@/lib/auth/permissions";
 import { createCategory, deleteProduct, saveProduct, type SaveProductResult } from "@/lib/admin/products";
@@ -9,6 +10,7 @@ import type { ActionResult } from "@/lib/admin/orders";
 // Admin-only: every action re-checks the role (actions are reachable by direct POST).
 
 function refreshStorefront(slugs: string[]) {
+  updateTag(CATALOG_TAG);
   revalidatePath("/");
   revalidatePath("/products");
   for (const slug of slugs) revalidatePath(`/products/${slug}`);

@@ -53,3 +53,11 @@ the repo, 15 credits each).
 
 The demo banner's text colour is chosen per store (black or white, whichever reads better on the
 accent colour); `npm test` fails if a store's banner, text or buttons would be hard to read.
+
+## Speed: the catalogue is cached
+
+Product, category, maker and wilaya reads are kept in the Next.js data cache (`lib/catalog.ts`), because the
+database (Neon, Frankfurt) is far from Netlify's servers and each query used to add up to a second per click.
+Orders and admin edits refresh the cache at once; anything else (the nightly reset, a change made directly
+in the database) shows within 5 minutes. Clicking a category or a product shows a grey placeholder of the
+page straight away (`loading.tsx`) while it loads.

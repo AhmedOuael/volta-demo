@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { SlidersHorizontal, X } from "lucide-react";
 import { useBrandHref } from "@/components/brand/BrandProvider";
@@ -31,6 +31,8 @@ export default function FilterSheet({
   const href = useBrandHref();
   const action = href("/products");
   const [open, setOpen] = useState(false);
+  // While the new results load, the current ones stay in place, dimmed.
+  const [pending, startTransition] = useTransition();
   const count = activeFilterCount(filters);
 
   useEffect(() => {
@@ -51,7 +53,7 @@ export default function FilterSheet({
       if (typeof v === "string" && v.trim() && !(k === "sort" && v === "new")) params.append(k, v.trim());
     }
     const qs = params.toString();
-    router.push(qs ? `${action}?${qs}` : action, { scroll: false });
+    startTransition(() => router.push(qs ? `${action}?${qs}` : action, { scroll: false }));
   };
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -175,7 +177,9 @@ export default function FilterSheet({
             </select>
           </label>
         </div>
-        {children}
+        <div aria-busy={pending} className={`transition-opacity duration-200 ${pending ? "opacity-50 pointer-events-none" : ""}`}>
+          {children}
+        </div>
       </div>
     </form>
   );

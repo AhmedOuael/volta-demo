@@ -1,5 +1,7 @@
 import "server-only";
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
+import { createHash } from "node:crypto";
 import { prisma } from "./prisma";
 import { imageUrl } from "./images";
 import type { Prisma } from "./generated/prisma/client";
@@ -75,10 +77,26 @@ function toCatalogProduct(p: ProductRow): CatalogProduct {
   };
 }
 
+// The catalogue changes only through the admin, orders and the nightly reset,
+// but the database is far from the server (Neon in Frankfurt), so every page
+// read used to cost a round trip of several hundred milliseconds. Reads are
+// kept in the Next.js data cache, tagged "catalog": admin edits and orders
+// expire it at once (updateTag), and it refreshes itself at least every 5 min
+// (covers the nightly reset, which runs outside the app).
+export const CATALOG_TAG = "catalog";
+const CATALOG_TTL_S = 300;
+// Entries are also keyed by database (a fingerprint, never the URL itself): the
+// build reads the live database while the tests run on the test branch, and
+// neither may be served the other's catalogue.
+export const DB_CACHE_KEY = createHash("sha256").update(process.env.DATABASE_URL ?? "").digest("hex").slice(0, 12);
+function cachedRead<A extends unknown[], R>(key: string, read: (...args: A) => Promise<R>) {
+  return cache(unstable_cache(read, ["catalog", DB_CACHE_KEY, key], { tags: [CATALOG_TAG], revalidate: CATALOG_TTL_S }));
+}
+
 const listable = { active: true, variants: { some: { active: true } } } satisfies Prisma.ProductWhereInput;
 
 /** Newest first; with filters, only the products that match (see lib/catalog-filters). */
-export const getProducts = cache(async (filters?: CatalogFilters): Promise<CatalogProduct[]> => {
+export const getProducts = cachedRead("products", async (filters?: CatalogFilters): Promise<CatalogProduct[]> => {
   const rows = await prisma.product.findMany({
     where: filters ? buildProductWhere(filters) : listable,
     include: productInclude,
@@ -89,7 +107,7 @@ export const getProducts = cache(async (filters?: CatalogFilters): Promise<Catal
 });
 
 /** Makers that have at least one listable product, for the filter list. */
-export const getMakers = cache(async (): Promise<string[]> => {
+export const getMakers = cachedRead("makers", async (): Promise<string[]> => {
   const rows = await prisma.product.findMany({
     where: { ...listable, maker: { not: "" } },
     distinct: ["maker"],
@@ -99,7 +117,7 @@ export const getMakers = cache(async (): Promise<string[]> => {
   return rows.map((r) => r.maker);
 });
 
-export const getProductBySlug = cache(async (slug: string): Promise<CatalogProduct | null> => {
+export const getProductBySlug = cachedRead("product", async (slug: string): Promise<CatalogProduct | null> => {
   const row = await prisma.product.findFirst({
     where: { ...listable, slug },
     include: productInclude,
@@ -168,7 +186,7 @@ export async function getBuyNowItem(variantIdParam: string) {
   };
 }
 
-export const getCategories = cache(async (): Promise<string[]> => {
+export const getCategories = cachedRead("categories", async (): Promise<string[]> => {
   const rows = await prisma.category.findMany({
     where: { active: true, products: { some: { product: listable } } },
     orderBy: { name: "asc" },

@@ -1,6 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
+import { CATALOG_TAG } from "@/lib/catalog";
 import { getCartVariants, type CartVariantInfo } from "@/lib/catalog";
 import { getDeliveryFee, type DeliveryType } from "@/lib/delivery";
 import { createOrder } from "@/lib/orders";
@@ -43,6 +44,7 @@ export async function placeOrder(input: unknown): Promise<PlaceOrderResponse> {
   if (!result.ok) return result;
 
   // Ordered items now show less available stock.
+  updateTag(CATALOG_TAG);
   revalidatePath("/");
   revalidatePath("/products");
   for (const slug of result.slugs) revalidatePath(`/products/${slug}`);

@@ -1,12 +1,19 @@
 import "server-only";
+import { unstable_cache } from "next/cache";
 import { prisma } from "./prisma";
+import { DB_CACHE_KEY } from "./catalog";
 
 export type WilayaOption = { id: string; code: string; name: string };
 
-export async function getWilayas(): Promise<WilayaOption[]> {
-  const rows = await prisma.wilaya.findMany({ where: { active: true }, orderBy: { code: "asc" } });
-  return rows.map((w) => ({ id: w.id.toString(), code: w.code, name: w.name }));
-}
+/** Active wilayas; they almost never change, so they are cached for an hour (see lib/catalog.ts). */
+export const getWilayas = unstable_cache(
+  async (): Promise<WilayaOption[]> => {
+    const rows = await prisma.wilaya.findMany({ where: { active: true }, orderBy: { code: "asc" } });
+    return rows.map((w) => ({ id: w.id.toString(), code: w.code, name: w.name }));
+  },
+  ["wilayas", DB_CACHE_KEY],
+  { revalidate: 3600 }
+);
 
 export const DELIVERY_TYPES = ["HOME", "STOP_DESK"] as const;
 export type DeliveryType = (typeof DELIVERY_TYPES)[number];

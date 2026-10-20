@@ -1,6 +1,7 @@
 "use server";
 
-import { refresh, revalidatePath } from "next/cache";
+import { refresh, revalidatePath, updateTag } from "next/cache";
+import { CATALOG_TAG } from "@/lib/catalog";
 import { requireUser } from "@/lib/auth/session";
 import { assertCanWrite } from "@/lib/auth/permissions";
 import { changeOrderStatus, updateOrderDetails, type ActionResult } from "@/lib/admin/orders";
@@ -31,6 +32,7 @@ export async function setOrderStatus(orderId: string, from: unknown, to: unknown
   const result = await changeOrderStatus(String(orderId), from, to, user);
   if (result.ok) {
     // Cancel/return/delivery change available stock on the storefront.
+    updateTag(CATALOG_TAG);
     revalidatePath("/");
     revalidatePath("/products");
     for (const slug of result.slugs ?? []) revalidatePath(`/products/${slug}`);
